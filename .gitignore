@@ -1,0 +1,144 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/ios/.symlinks/
+/ios/Flutter/App.framework
+/ios/Flutter/engine.framework
+/ios/Flutter/flutter_assets/
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/info.plist
+/ios/Flutter/flutter_export_environment.sh
+/ios/Pods/
+/ios/Runner.xcworkspace
+/ios/Runner/GeneratedPluginRegistrant.*
+/ios/ServiceDefinitions.json
+/ios/Flutter/ephemeral/
+/ios/Flutter/app.flx
+/ios/Flutter/app.zip
+/ios/Flutter/snapshot_blob.bin
+/ios/Flutter/isolate_snapshot_data
+/ios/Flutter/vm_snapshot_data
+/ios/Flutter/pipeline_instrumentation.json
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/
+/ios/Runner/Assets.xcassets/LaunchImage.launchimage/
+/ios/Runner/Assets.xcassets/BrandAsset.brandassets/
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png
+/ios_Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png
+/ios_Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-20x20@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-20x20@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-20x20@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-29x29@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-29x29@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-29x29@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40x40@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40x40@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40x40@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-50x50@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-50x50@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-50x50@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-60x60@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-60x60@3x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-76x76@1x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-76x76@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-83.5x83.5@2x.png
+/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-1024x1024@1x.png
+
+# Android
+/android/app/src/main/assets/flutter_assets/
+/android/app/build/
+/android/.gradle/
+/android/key.properties
+/android/local.properties
+
+# Web
+/web/
+/lib/generated_plugin_registrant.dart
+
+# VS Code
+.vscode/
+
+# Xcode
+*.moved-aside
+DerivedData/
+.hmap/
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+#Pods - managed by Flutter
+
+# Android Studio
+.gradle
+captures/
+.idea/
+local.properties
+/gradle
+/gradlew
+/gradle.bat
+
+# User-specific files
+*.DS_Store
+.history
+.svn
+
+# Dart
+.dart_tool/
+.packages
+pubspec.lock
+/build/
+
+# Build artifacts
+build/
+# Don't ignore web folder as it's a primary target
+# /web/
+
+# Generated files by flutter packages
+*.g.dart
+*.freezed.dart
+*.config.dart
+
+# Sensitive files
+credentials.json
+google-services.json
+/ios/firebase_app_id_file.json
+/android/app/google-services.json

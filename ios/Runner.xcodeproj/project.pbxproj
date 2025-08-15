@@ -1,0 +1,198 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		008A384425442E7A003253E5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 008A384325442E7A003253E5 /* AppDelegate.swift */; };
+		249BC47F25442E86006D481C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 249BC47E25442E86006D481C /* Assets.xcassets */; };
+		3336125E25442E890022835B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3336125C25442E890022835B /* LaunchScreen.storyboard */; };
+		3336126025442E890022835B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3336125D25442E890022835B /* Main.storyboard */; };
+		C03C251C25442E6C0044813D /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C03C251B25442E6C0044813D /* Flutter.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		008A384325442E7A003253E5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		249BC47E25442E86006D481C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3336125C25442E890022835B /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3336125D25442E890022835B /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		C03C251B25442E6C0044813D /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = Flutter/Flutter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C03C251E25442E6C0044813D /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = BUILT_PRODUCTS_DIR; };
+		C03C251F25442E6C0044813D /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C03C252025442E6C0044813D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C03C252125442E6C0044813D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C03C251825442E6C0044813D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C03C251C25442E6C0044813D /* Flutter.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C03C251125442E6C0044813D = {
+			isa = PBXGroup;
+			children = (
+				C03C252225442E6C0044813D /* Runner */,
+				C03C251A25442E6C0044813D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C03C251A25442E6C0044813D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C03C252025442E6C0044813D /* Runner.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C03C252225442E6C0044813D /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				008A384325442E7A003253E5 /* AppDelegate.swift */,
+				249BC47E25442E86006D481C /* Assets.xcassets */,
+				3336125C25442E890022835B /* LaunchScreen.storyboard */,
+				3336125D25442E890022835B /* Main.storyboard */,
+				C03C252125442E6C0044813D /* Info.plist */,
+			);
+			path = Runner;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C03C251D25442E6C0044813D /* Runner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C03C252525442E6C0044813D /* Build configuration list for PBXNativeTarget "Runner" */;
+			buildPhases = (
+				C03C251825442E6C0044813D /* Frameworks */,
+				C03C251925442E6C0044813D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Runner;
+			productName = Runner;
+			productReference = C03C252025442E6C0044813D /* Runner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C03C251225442E6C0044813D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1320;
+				ORGANIZATIONNAME = "com.example";
+				TargetAttributes = {
+					C03C251D25442E6C0044813D = {
+						CreatedOnToolsVersion = 13.2.1;
+					};
+				};
+			};
+			buildConfigurationList = C03C251525442E6C0044813D /* Build configuration list for PBXProject "Runner" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C03C251125442E6C0044813D;
+			productRefGroup = C03C251A25442E6C0044813D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C03C251D25442E6C0044813D /* Runner */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C03C251925442E6C0044813D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				249BC47F25442E86006D481C /* Assets.xcassets in Resources */,
+				3336125E25442E890022835B /* LaunchScreen.storyboard in Resources */,
+				3336126025442E890022835B /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C03C252325442E6C0044813D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.holdThatThought;
+				PRODUCT_NAME = hold_that_thought;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		C03C252425442E6C0044813D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.holdThatThought;
+				PRODUCT_NAME = hold_that_thought;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C03C251525442E6C0044813D /* Build configuration list for PBXProject "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C03C252325442E6C0044813D /* Debug */,
+				C03C252425442E6C0044813D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C03C252525442E6C0044813D /* Build configuration list for PBXNativeTarget "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C03C252325442E6C0044813D /* Debug */,
+				C03C252425442E6C0044813D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C03C251225442E6C0044813D /* Project object */;
+}
