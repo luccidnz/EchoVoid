@@ -44,9 +44,21 @@ function LiveITC() {
 
   // Sensor subscriptions
   useEffect(() => {
-  const magSub = Magnetometer.addListener((data) => setMag([data.x, data.y, data.z]));
-  const accSub = Accelerometer.addListener((data) => setAcc([data.x, data.y, data.z]));
-  return () => { magSub.remove(); accSub.remove(); };
+  let magSub: any;
+  let accSub: any;
+  (async () => {
+    const { granted } = await Accelerometer.requestPermissionsAsync();
+    if (!granted) return;
+    magSub = Magnetometer.addListener((data) => setMag([data.x, data.y, data.z]));
+    accSub = Accelerometer.addListener((data) => setAcc([data.x, data.y, data.z]));
+  })();
+  return () => {
+    try {
+      magSub && magSub.remove();
+    } finally {
+      accSub && accSub.remove();
+    }
+  };
   }, []);
 
   // Start/stop LiveChain (mic input) when enabled changes

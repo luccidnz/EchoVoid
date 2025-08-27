@@ -20,16 +20,25 @@ export default function ARModeScreen({ navigation }: any) {
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
-    const magSub = Magnetometer.addListener((d) => setMag([d.x, d.y, d.z]));
-    const accSub = Accelerometer.addListener((d) => setAcc([d.x, d.y, d.z]));
+    let magSub: any;
+    let accSub: any;
     let lightSub: any;
-    try {
-      lightSub = LightSensor.addListener((d) => setLight(d.illuminance));
-    } catch {}
+    (async () => {
+      const { granted } = await Accelerometer.requestPermissionsAsync();
+      if (!granted) return;
+      magSub = Magnetometer.addListener((d) => setMag([d.x, d.y, d.z]));
+      accSub = Accelerometer.addListener((d) => setAcc([d.x, d.y, d.z]));
+      try {
+        lightSub = LightSensor.addListener((d) => setLight(d.illuminance));
+      } catch {}
+    })();
     return () => {
-      magSub.remove();
-      accSub.remove();
-      if (lightSub) lightSub.remove();
+      try {
+        magSub && magSub.remove();
+        if (lightSub) lightSub.remove();
+      } finally {
+        accSub && accSub.remove();
+      }
     };
   }, []);
 
