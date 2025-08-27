@@ -126,7 +126,10 @@ function LiveITC() {
           {word && <Text style={{ color: theme.colors.accent, fontSize: 18, marginTop: 8 }}>ITC Word: {word}</Text>}
         </View>
       </View>
-      <AudioReactiveBars />
+      <AudioReactiveBars
+        barCount={24}
+        colors={[theme.colors.accent, theme.colors.primary]}
+      />
       <View style={styles.row}>
         <VU value={vu} peak={peak} />
         <Knob value={gain} onChange={setGain} min={0} max={1} label="Gain" format="" />
