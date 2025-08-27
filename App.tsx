@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeProvider } from './src/theme/theme';
+import { ThemeProvider as BackgroundProvider } from './src/theme/theme';
+import { ThemeProvider } from './theme';
 import EsmeraProvider from './services/tts/EsmeraProvider';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -82,19 +83,21 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <EsmeraProvider>
-          <NavigationContainer>
-            {showOnboarding ? (
-              <Stack.Navigator initialRouteName="OnboardingIntro" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="OnboardingIntro" component={OnboardingIntro} />
-                <Stack.Screen name="OnboardingHowTo" component={OnboardingHowTo} />
-                <Stack.Screen name="OnboardingPrivacy" component={OnboardingPrivacy} />
-              </Stack.Navigator>
-            ) : (
-              <TestNavigator />
-            )}
-          </NavigationContainer>
-        </EsmeraProvider>
+        <BackgroundProvider>
+          <EsmeraProvider>
+            <NavigationContainer>
+              {showOnboarding ? (
+                <Stack.Navigator initialRouteName="OnboardingIntro" screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="OnboardingIntro" component={OnboardingIntro} />
+                  <Stack.Screen name="OnboardingHowTo" component={OnboardingHowTo} />
+                  <Stack.Screen name="OnboardingPrivacy" component={OnboardingPrivacy} />
+                </Stack.Navigator>
+              ) : (
+                <TestNavigator />
+              )}
+            </NavigationContainer>
+          </EsmeraProvider>
+        </BackgroundProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

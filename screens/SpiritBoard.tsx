@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '../theme';
 import getEntropy from '../services/rng/Entropy';
 
 const LETTERS = [
@@ -11,6 +12,7 @@ const LETTERS = [
 ];
 
 export default function SpiritBoard() {
+  const { theme } = useTheme();
   const [pointer, setPointer] = useState({ row: 1, col: 3 });
 
   // Use entropy from sensors for pointer movement
@@ -30,34 +32,41 @@ export default function SpiritBoard() {
   }, []);
 
   return (
-    <View style={styles.flex}>
-      <Text style={styles.title}>Spirit Board</Text>
+    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}>
+      <Text style={[styles.title, { color: theme.colors.text }]}>Spirit Board</Text>
       <View style={styles.grid}>
         {LETTERS.map((row, r) => (
           <View key={r} style={styles.row}>
             {row.map((ch, c) => (
               <View
                 key={ch}
-                style={[styles.cell, pointer.row === r && pointer.col === c && styles.pointer]}
+                style={[
+                  styles.cell,
+                  { backgroundColor: theme.colors.surface },
+                  pointer.row === r && pointer.col === c && {
+                    backgroundColor: theme.colors.accent,
+                    borderWidth: 2,
+                    borderColor: theme.colors.text,
+                  },
+                ]}
               >
-                <Text style={styles.letter}>{ch}</Text>
+                <Text style={[styles.letter, { color: theme.colors.text }]}>{ch}</Text>
               </View>
             ))}
           </View>
         ))}
       </View>
-      <Text style={styles.tip}>Pointer uses sensor entropy for movement</Text>
+      <Text style={[styles.tip, { color: theme.colors.text, opacity: 0.7 }]}>Pointer uses sensor entropy for movement</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
+  flex: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 28, fontWeight: '800', marginBottom: 24 },
   grid: { marginBottom: 32 },
   row: { flexDirection: 'row' },
-  cell: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#222', margin: 6, alignItems: 'center', justifyContent: 'center' },
-  pointer: { backgroundColor: '#00E0FF', borderWidth: 2, borderColor: '#fff' },
-  letter: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  tip: { color: '#aaa', fontSize: 13, marginTop: 12 },
+  cell: { width: 44, height: 44, borderRadius: 22, margin: 6, alignItems: 'center', justifyContent: 'center' },
+  letter: { fontSize: 22, fontWeight: '700' },
+  tip: { fontSize: 13, marginTop: 12 },
 });
