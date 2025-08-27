@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+  "baseUrl": ".",
+  "paths": { "src/*": ["src/*"] },
+  "jsx": "react-native",
+  "strict": true,
+  "skipLibCheck": true,
+  "moduleResolution": "bundler",
+  "customConditions": ["react-native"],
+  },
+  "extends": "expo/tsconfig.base"
+}
