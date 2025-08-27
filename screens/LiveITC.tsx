@@ -51,8 +51,11 @@ function LiveITC() {
 
   // Start/stop LiveChain (mic input) when enabled changes
   useEffect(() => {
-  if (enabled) {
-    } else if (liveChainActive.current) {
+    if (enabled && !liveChainActive.current) {
+      LiveChain.startLiveChain({ onLevel: setVu, gain, fx }).then(() => {
+        liveChainActive.current = true;
+      });
+    } else if (!enabled && liveChainActive.current) {
       LiveChain.stopLiveChain();
       liveChainActive.current = false;
       setVu(0);
