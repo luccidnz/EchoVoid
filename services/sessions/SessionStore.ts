@@ -11,12 +11,27 @@ const MEDIA_DIR = `${FileSystem.documentDirectory}media/`;
 async function create(session: any) {
   try {
     const sessions = await list();
+    const mediaPath = `${MEDIA_DIR}${session.id}/`;
     sessions.push(session);
     await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
 
-    if (session.media) {
-      const mediaPath = `${MEDIA_DIR}${session.id}/`;
+    if (session.snapshot || session.media) {
       await FileSystem.makeDirectoryAsync(mediaPath, { intermediates: true });
+    }
+
+    if (session.snapshot) {
+      try {
+        const name = session.snapshot.split('/').pop();
+        const dest = `${mediaPath}${name}`;
+        await FileSystem.copyAsync({ from: session.snapshot, to: dest });
+        session.snapshot = dest;
+        await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      } catch (fileError) {
+        console.error('Failed to save snapshot:', fileError);
+      }
+    }
+
+    if (session.media) {
       for (const file of session.media) {
         try {
           await FileSystem.copyAsync({ from: file, to: `${mediaPath}${file.split('/').pop()}` });
@@ -56,6 +71,18 @@ async function update(id: string, data: any) {
     const sessions = await list();
     const idx = sessions.findIndex((s: any) => s.id === id);
     if (idx !== -1) {
+      const mediaPath = `${MEDIA_DIR}${id}/`;
+      if (data.snapshot) {
+        try {
+          await FileSystem.makeDirectoryAsync(mediaPath, { intermediates: true });
+          const name = data.snapshot.split('/').pop();
+          const dest = `${mediaPath}${name}`;
+          await FileSystem.copyAsync({ from: data.snapshot, to: dest });
+          data.snapshot = dest;
+        } catch (fileError) {
+          console.error('Failed to save snapshot:', fileError);
+        }
+      }
       sessions[idx] = { ...sessions[idx], ...data };
       await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
       return true;
