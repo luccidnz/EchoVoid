@@ -57,3 +57,5 @@ export function EsmeraProvider({ children }: { children: React.ReactNode }): Rea
     </EsmeraContext.Provider>
   );
 }
+
+export default EsmeraProvider;
