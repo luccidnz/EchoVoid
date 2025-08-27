@@ -1,6 +1,7 @@
 
 
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import Logo from '../assets/Logo';
 import { useTheme } from '../theme';
 import ParticleField from '../components/fx/ParticleField';
 import EVoidButton from '../components/ui/EVoidButton';
@@ -16,7 +17,7 @@ export default function Home() {
     <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
       <ParticleField />
       <View style={styles.center}>
-        <Image source={require('../assets/logo.svg')} style={{ width: 96, height: 96, marginBottom: 16 }} />
+        <Logo width={96} height={96} style={{ marginBottom: 16 }} />
         <Text style={[styles.title, { color: theme.colors.text }]}>Ech0Void</Text>
         <Text style={[styles.subtitle, { color: theme.colors.accent }]}>where echos become answers</Text>
   <EVoidButton label="Begin Transmission" onPress={() => navigation.navigate('Transmission')} style={styles.btn} />
