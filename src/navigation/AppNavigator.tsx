@@ -1,12 +1,12 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { navTheme } from '../theme/theme';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import TransmissionScreen from '../screens/TransmissionScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import ARModeScreen from '../screens/ARModeScreen';
+import ARScreen from '../screens/ARScreen';
 
 import Logbook from '../../screens/Logbook';
 import SessionDetail from '../../components/logbook/SessionDetail';
@@ -25,7 +25,7 @@ export type RootStackParamList = {
   SessionDetail: { session: any };
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
   // Log navigation container state
@@ -36,12 +36,25 @@ function AppNavigator() {
       theme={navTheme}
       onStateChange={(state) => console.log('[AppNavigator] Navigation state changed:', state)}
     >
-      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Welcome"
+        screenOptions={{
+          headerShown: false,
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Transmission" component={TransmissionScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="ARMode" component={ARModeScreen} />
+        <Stack.Screen
+          name="ARMode"
+          component={ARScreen}
+          options={{
+            presentation: 'modal',
+            ...TransitionPresets.ModalSlideFromBottomIOS,
+          }}
+        />
         <Stack.Screen name="Logbook" component={Logbook} />
         <Stack.Screen name="SessionDetail" component={SessionDetail} />
       </Stack.Navigator>
