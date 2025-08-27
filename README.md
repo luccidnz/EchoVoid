@@ -3,22 +3,22 @@
 ## Requirements
 
 * Node 18–20 (avoid Node 22)
-* Android device (Expo Dev Client recommended)
+* Android device with Expo Go installed
 
 ## Install \& Run
 
 npm install
-npx expo install expo-av expo-file-system expo-sensors expo-speech expo-dev-client   
-'@react-navigation/native '@react-navigation/native-stack react-native-screens   
+npx expo install expo-av expo-file-system expo-sensors expo-speech \
+'@react-navigation/native' '@react-navigation/native-stack' react-native-screens \
 react-native-safe-area-context react-native-gesture-handler react-native-reanimated
 
 # (Optional voice)
 
 npm i @react-native-voice/voice
 
-# Start (Dev Client preferred)
+# Start (Expo Go)
 
-npx expo start --dev-client --tunnel
+npx expo start --tunnel
 
 ## Notes
 
