@@ -1,11 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+
+interface SessionItemProps {
+  session: any;
+  onDelete?: () => void;
+  onView?: () => void;
+}
+
 // TODO: Show session summary, type, date, and quick actions
-export default function SessionItem({ session, onDelete, onView }: { session: any; onDelete: () => void; onView: () => void }) {
+export default function SessionItem({ session, onDelete = () => {}, onView = () => {} }: SessionItemProps) {
+  const date = session.date ?? session.created ?? Date.now();
   return (
     <View style={styles.item}>
       <Text style={styles.type}>{session.type || 'Session'}</Text>
-      <Text style={styles.date}>{new Date(session.created).toLocaleString()}</Text>
+      <Text style={styles.date}>{new Date(date).toLocaleString()}</Text>
       <Text style={styles.info}>Anomalies: {session.anomalies?.length ?? 0}</Text>
       <View style={styles.actions}>
         <Pressable onPress={onView} style={styles.actionButton}><Text style={styles.actionText}>View</Text></Pressable>
