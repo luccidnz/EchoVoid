@@ -16,12 +16,13 @@ let onLevel: ((n: number) => void) | null = null;
 		fx = opts.fx ?? 'Echo';
 		onLevel = opts.onLevel ?? null;
 		console.time('LiveChain:start');
-		try {
-			await Audio.requestPermissionsAsync();
-			await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-			recording = new Audio.Recording();
-			await recording.prepareToRecordAsync(RecordingOptionsPresets.HIGH_QUALITY);
-			await recording.startAsync();
+                try {
+                        const { granted } = await Audio.requestPermissionsAsync();
+                        if (!granted) { isActive = false; return; }
+                        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+                        recording = new Audio.Recording();
+                        await recording.prepareToRecordAsync(RecordingOptionsPresets.HIGH_QUALITY);
+                        await recording.startAsync();
 			// Simulate level monitoring (real: use Audio API or native module)
 			const levelInterval = setInterval(() => {
 				if (!isActive || !onLevel) return;
@@ -36,16 +37,17 @@ let onLevel: ((n: number) => void) | null = null;
 	}
 
 	export async function stopLiveChain() {
-		console.time('LiveChain:stop');
-		isActive = false;
-		if (recording) {
-			try {
-				await recording.stopAndUnloadAsync();
-			} catch {}
-			if ((recording as any)._levelInterval) clearInterval((recording as any)._levelInterval);
-			recording = null;
-		}
-		console.timeEnd('LiveChain:stop');
+                console.time('LiveChain:stop');
+                isActive = false;
+                if (recording) {
+                        try {
+                                await recording.stopAndUnloadAsync();
+                        } finally {
+                                if ((recording as any)._levelInterval) clearInterval((recording as any)._levelInterval);
+                                recording = null;
+                        }
+                }
+                console.timeEnd('LiveChain:stop');
 	}
 
 export function setGain(g: number) { gain = g; }
