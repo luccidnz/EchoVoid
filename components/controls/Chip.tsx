@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme';
+import { useTheme, Theme } from '../../theme';
 export default function Chip({ options, value, onChange }: {
   options: string[];
   value: string;
   onChange: (v: string) => void;
 }) {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   return (
     <View style={styles.row}>
       {options.map(opt => (
@@ -21,8 +22,11 @@ export default function Chip({ options, value, onChange }: {
     </View>
   );
 }
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 8, marginVertical: 8 },
-  chip: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 16, margin: 2 },
-  text: { fontWeight: '600', fontSize: 14 },
-});
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    row: { flexDirection: 'row', gap: 8, marginVertical: 8 },
+    chip: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 16, margin: 2 },
+    text: { ...theme.typography.caption, fontWeight: '600', fontSize: 14 },
+  });
+}

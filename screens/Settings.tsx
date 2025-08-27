@@ -1,18 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme, themes, ThemeName } from '../theme';
+import { useTheme, themes, ThemeName, Theme } from '../theme';
 import Chip from '../components/controls/Chip';
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
+  const styles = createStyles(theme);
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
+    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}>
       <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
       <Text style={[styles.label, { color: theme.colors.text }]}>Theme</Text>
       <Chip
         options={Object.keys(themes) as ThemeName[]}
         value={theme.name}
-  onChange={v => setTheme(v as ThemeName)}
+        onChange={v => setTheme(v as ThemeName)}
       />
       <Text style={[styles.label, { color: theme.colors.text }]}>Audio FX (coming soon)</Text>
       <Text style={[styles.label, { color: theme.colors.text }]}>Performance (coming soon)</Text>
@@ -21,8 +22,10 @@ export default function Settings() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, padding: 24 },
-  title: { fontSize: 28, fontWeight: '800', marginBottom: 24 },
-  label: { fontSize: 16, fontWeight: '600', marginTop: 18 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1, padding: 24 },
+    title: { ...theme.typography.heading1, marginBottom: 24 },
+    label: { ...theme.typography.label, marginTop: 18 },
+  });
+}

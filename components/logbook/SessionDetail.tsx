@@ -3,11 +3,14 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Audio } from 'expo-av';
 import EVoidButton from '../ui/EVoidButton';
 import { shareSessionZip } from '../../services/export/zipSession';
+import { useTheme, Theme } from '../../theme';
 
 export default function SessionDetail({ route }: any) {
   const session = route?.params?.session;
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   const handlePlay = async () => {
     if (!session?.uri) return;
@@ -56,13 +59,16 @@ export default function SessionDetail({ route }: any) {
       ) : (
         <Text style={styles.value}>None</Text>
       )}
-  <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: 24 }} />
+      <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: 24 }} />
     </ScrollView>
   );
 }
-const styles = StyleSheet.create({
-  detail: { flex: 1, padding: 20, backgroundColor: '#111' },
-  title: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 16 },
-  label: { color: '#aaa', fontWeight: '600', marginTop: 12 },
-  value: { color: '#fff', fontSize: 15, marginTop: 2 },
-});
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    detail: { flex: 1, padding: 20, backgroundColor: '#111' },
+    title: { ...theme.typography.heading2, color: '#fff', marginBottom: 16 },
+    label: { ...theme.typography.label, color: '#aaa', marginTop: 12 },
+    value: { ...theme.typography.body, color: '#fff', marginTop: 2 },
+  });
+}

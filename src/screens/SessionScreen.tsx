@@ -8,6 +8,7 @@ import Toggle from '../components/Toggle';
 import { speakEsmera } from '../core/audio/tts';
 import { useTranscription } from '../core/audio/transcription';
 import { detectAnomalies, setSensitivity } from '../core/anomaly/detector';
+import { useTheme } from '../../theme';
 
 export default function SessionScreen({navigation}:any){
   const { engine, session, start, stop, sync } = useSession();
@@ -15,6 +16,7 @@ export default function SessionScreen({navigation}:any){
   const [amp,setAmp] = useState(0);
   const [mode,setMode] = useState<'Standard'|'Mana'|'Reverse'|'DreamLink'|'Shadow'|'CallAndResponse'>('Standard');
   const [hits,setHits] = useState<any[]>([]);
+  const { theme } = useTheme();
 
   useEffect(()=> engine.level$(setAmp), [engine]);
   useEffect(()=>{ const det = setInterval(()=>{
@@ -26,35 +28,34 @@ export default function SessionScreen({navigation}:any){
 
   return (
   <ScrollView style={{flex:1, backgroundColor:colors.bg}} contentContainerStyle={{padding:16, gap:16}}>
-      <Text style={{color:colors.text, fontSize:18}}>Mode</Text>
+      <Text style={[theme.typography.heading3, {color:colors.text}]}>Mode</Text>
       <View style={{flexDirection:'row', flexWrap:'wrap'}}>
         {(['Standard','Mana','Reverse','DreamLink','Shadow','CallAndResponse'] as const).map(m =>
           <Toggle key={m} label={m} active={mode===m} onPress={()=>setMode(m)} />
         )}
       </View>
 
-  <Text style={{color:colors.text, fontSize:18}}>Sweep / Meter</Text>
+  <Text style={[theme.typography.heading3, {color:colors.text}]}>Sweep / Meter</Text>
       <Visualizer level={amp}/>
     <Meter level={amp} color={colors.neon}/>
+  <Text style={[theme.typography.heading3, {color:colors.text, marginTop:8}]}>Transcript</Text>
+  <Text style={[theme.typography.body, {color:colors.neon}]}>{text || '…listening…'}</Text>
+    <Text style={[theme.typography.caption, {color:colors.neon2, opacity:conf==null?0.5:1}]}>confidence: {conf==null?'—':Math.round(conf*100)+'%'}</Text>
 
-  <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Transcript</Text>
-  <Text style={{color:colors.neon}}>{text || '…listening…'}</Text>
-    <Text style={{color:colors.neon2, opacity:conf==null?0.5:1}}>confidence: {conf==null?'—':Math.round(conf*100)+'%'}</Text>
-
-  <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Anomalies</Text>
-  {hits.map((h,i)=>(<Text key={i} style={{color:colors.neon2}}>{`hit @${Math.round(h.freq)}Hz (${Math.round(h.confidence*100)}%)`}</Text>))}
+  <Text style={[theme.typography.heading3, {color:colors.text, marginTop:8}]}>Anomalies</Text>
+  {hits.map((h,i)=>(<Text key={i} style={[theme.typography.body, {color:colors.neon2}]}>{`hit @${Math.round(h.freq)}Hz (${Math.round(h.confidence*100)}%)`}</Text>))}
 
       <View style={{flexDirection:'row', gap:12, marginTop:8}}>
         {!session
-          ? <Pressable onPress={()=>start(mode)} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Start</Text></Pressable>
-          : <Pressable onPress={()=>stop()} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Stop</Text></Pressable>}
+          ? <Pressable onPress={()=>start(mode)} style={btn}><Text style={[theme.typography.button, { color: colors.neon }]}>Start</Text></Pressable>
+          : <Pressable onPress={()=>stop()} style={btn}><Text style={[theme.typography.button, { color: colors.neon }]}>Stop</Text></Pressable>}
         {supported
           ? !listening
-            ? <Pressable onPress={startASR} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Listen</Text></Pressable>
-            : <Pressable onPress={stopASR} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Stop ASR</Text></Pressable>
-          : <Pressable onPress={onSpeak} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Speak</Text></Pressable>}
-      <Pressable onPress={()=>navigation.navigate('Logbook')} style={btnGhost}><Text style={{color:colors.text}}>Logbook</Text></Pressable>
-      <Pressable onPress={sync} style={btnGhost}><Text style={{color:colors.text}}>Sync</Text></Pressable>
+            ? <Pressable onPress={startASR} style={btn}><Text style={[theme.typography.button, { color: colors.neon }]}>Listen</Text></Pressable>
+            : <Pressable onPress={stopASR} style={btn}><Text style={[theme.typography.button, { color: colors.neon }]}>Stop ASR</Text></Pressable>
+          : <Pressable onPress={onSpeak} style={btn}><Text style={[theme.typography.button, { color: colors.neon }]}>Speak</Text></Pressable>}
+      <Pressable onPress={()=>navigation.navigate('Logbook')} style={btnGhost}><Text style={[theme.typography.button, {color:colors.text}]}>Logbook</Text></Pressable>
+      <Pressable onPress={sync} style={btnGhost}><Text style={[theme.typography.button, {color:colors.text}]}>Sync</Text></Pressable>
       </View>
     </ScrollView>
   );

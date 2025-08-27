@@ -6,10 +6,13 @@ import type { RootStackParamList } from '../navigation/AppNavigator';
 import UIButton from '../components/UIButton';
 import { colors } from '../theme/colors';
 import { hasNativeVoice, startListening } from '../voice/adapter';
+import { useTheme, Theme } from '../../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const onBegin = async () => {
     console.log('[Home] Begin pressed');
     console.log('[HomeScreen] Navigating to Transmission');
@@ -49,37 +52,35 @@ export default function HomeScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: {
-    flex: 1,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  title: {
-    color: colors.text, fontSize: 44, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase',
-  },
-  subtitle: {
-    color: colors.subtext, marginTop: 6, marginBottom: 18,
-  },
-  btn: {
-    width: '90%',
-    backgroundColor: '#12122B',
-    borderColor: colors.neon,
-  },
-  ring: {
-    position: 'absolute',
-    bottom: -40,
-    alignSelf: 'center',
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    borderWidth: 6,
-    borderColor: 'rgba(0,243,255,0.25)',
-    shadowColor: colors.neon,
-    shadowOpacity: 0.4,
-    shadowRadius: 24,
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    container: {
+      flex: 1,
+      padding: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+    },
+    title: { ...theme.typography.display, color: colors.text, fontSize: 44, textTransform: 'uppercase' },
+    subtitle: { ...theme.typography.body, color: colors.subtext, marginTop: 6, marginBottom: 18 },
+    btn: {
+      width: '90%',
+      backgroundColor: '#12122B',
+      borderColor: colors.neon,
+    },
+    ring: {
+      position: 'absolute',
+      bottom: -40,
+      alignSelf: 'center',
+      width: 280,
+      height: 280,
+      borderRadius: 140,
+      borderWidth: 6,
+      borderColor: 'rgba(0,243,255,0.25)',
+      shadowColor: colors.neon,
+      shadowOpacity: 0.4,
+      shadowRadius: 24,
+    },
+  });
+}

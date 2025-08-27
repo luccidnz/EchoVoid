@@ -6,6 +6,7 @@ import { GLView } from 'expo-gl';
 import { Renderer } from 'expo-three';
 import * as THREE from 'three';
 import { colors } from '../theme/colors';
+import { useTheme, Theme } from '../../theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -17,6 +18,8 @@ export default function ARModeScreen({ navigation }: any) {
   const hasPermission = permission?.granted ?? false;
   const cameraRef = useRef(null);
   const [type] = useState(CameraType.Back);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
@@ -82,8 +85,10 @@ export default function ARModeScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, padding: 24, alignItems: 'center' },
-  h1: { color: colors.text, fontSize: 28, fontWeight: '700', marginTop: 32 },
-  p: { color: colors.subtext, marginTop: 8 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    overlay: { position: 'absolute', top: 0, left: 0, right: 0, padding: 24, alignItems: 'center' },
+    h1: { ...theme.typography.heading1, color: colors.text, marginTop: 32 },
+    p: { ...theme.typography.body, color: colors.subtext, marginTop: 8 },
+  });
+}

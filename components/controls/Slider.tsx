@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { useTheme } from '../../theme';
+import { useTheme, Theme } from '../../theme';
 export default function EVoidSlider({ value, onChange, min = 0, max = 1, step = 0.01, label, format }: {
   value: number;
   onChange: (v: number) => void;
@@ -12,6 +12,7 @@ export default function EVoidSlider({ value, onChange, min = 0, max = 1, step = 
   format?: string;
 }) {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   return (
     <View style={styles.wrap}>
       {label && <Text style={[styles.label, { color: theme.colors.text }]}>{label}</Text>}
@@ -30,9 +31,12 @@ export default function EVoidSlider({ value, onChange, min = 0, max = 1, step = 
     </View>
   );
 }
-const styles = StyleSheet.create({
-  wrap: { width: '100%', marginVertical: 8 },
-  label: { marginBottom: 4, fontWeight: '600' },
-  slider: { width: '100%' },
-  value: { fontWeight: '700', fontSize: 15, marginTop: 2 },
-});
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    wrap: { width: '100%', marginVertical: 8 },
+    label: { ...theme.typography.label, marginBottom: 4 },
+    slider: { width: '100%' },
+    value: { ...theme.typography.body, fontWeight: '700', fontSize: 15, marginTop: 2 },
+  });
+}

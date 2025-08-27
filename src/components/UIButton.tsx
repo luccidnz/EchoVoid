@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme, Theme } from '../../theme';
 
 type Props = {
   label: string;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export default function UIButton({ label, onPress, style, testID }: Props) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   return (
     <Pressable
       testID={testID}
@@ -30,19 +33,16 @@ export default function UIButton({ label, onPress, style, testID }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  btn: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 14,
-    backgroundColor: '#111827',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
-  },
-  text: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    btn: {
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      borderRadius: 14,
+      backgroundColor: '#111827',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.10)',
+    },
+    text: { ...theme.typography.button, color: theme.colors.text },
+  });
+}

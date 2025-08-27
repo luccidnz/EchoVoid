@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View, Text, PanResponder, StyleSheet } from 'react-native';
 import Animated, { useSharedValue, useAnimatedProps, withSpring } from 'react-native-reanimated';
 import Svg, { Circle, G, Path as SvgPath } from 'react-native-svg';
-import { useTheme } from '../../theme';
+import { useTheme, Theme } from '../../theme';
 const TICK_COUNT = 18;
 
 function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
@@ -31,6 +31,7 @@ export default function Knob({ value, onChange, min = 0, max = 1, step = 0.01, s
   format?: string;
 }) {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const angleRange = 270;
   const startAngle = 135;
   const endAngle = 405;
@@ -93,7 +94,10 @@ export default function Knob({ value, onChange, min = 0, max = 1, step = 0.01, s
     </View>
   );
 }
-const styles = StyleSheet.create({
-  label: { fontWeight: '600', marginTop: 2 },
-  value: { fontWeight: '700', fontSize: 16 },
-});
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    label: { ...theme.typography.label, marginTop: 2 },
+    value: { ...theme.typography.button },
+  });
+}
