@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import SessionStore from '../services/sessions/SessionStore';
 import SessionItem from '../components/logbook/SessionItem';
+import Screen from './_layout/Screen';
 
 export default function Logbook({ navigation }: any) {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -13,7 +14,7 @@ export default function Logbook({ navigation }: any) {
   }, []);
 
   return (
-    <View style={styles.flex}>
+    <Screen style={styles.flex}>
       <Text style={styles.title}>Logbook</Text>
       <FlatList
         data={sessions}
@@ -26,7 +27,7 @@ export default function Logbook({ navigation }: any) {
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={<Text style={styles.empty}>No sessions yet.</Text>}
       />
-    </View>
+    </Screen>
   );
 }
 

@@ -3,7 +3,7 @@ import { Magnetometer, Accelerometer } from 'expo-sensors';
 import { createEngine, PRESETS } from '../src/core/audio/evpEngine';
 import { WORD_BANK } from '../src/core/audio/wordBank';
 import LiveChain from '../services/audio/LiveChain';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../theme';
 import VU from '../components/controls/VU';
 import Knob from '../components/controls/Knob';
@@ -12,9 +12,9 @@ import Toggle from '../components/controls/Toggle';
 import Chip from '../components/controls/Chip';
 import XYPad from '../components/controls/XYPad';
 import AudioReactiveBars from '../components/fx/AudioReactiveBars';
-import NoiseOverlay from '../components/fx/NoiseOverlay';
 import Timer from '../components/controls/Timer';
 import EVoidButton from '../components/ui/EVoidButton';
+import Screen from './_layout/Screen';
 
 
 function LiveITC() {
@@ -105,8 +105,7 @@ function LiveITC() {
   };
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
-      <NoiseOverlay />
+    <Screen style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.text }]}>Live ITC</Text>
         <Timer ms={timer} />
@@ -137,7 +136,7 @@ function LiveITC() {
         <EVoidSlider value={gain} onChange={setGain} min={0} max={1} label="Mix" format="" />
         <XYPad x={x} y={y} onChange={(nx, ny) => { setX(nx); setY(ny); }} label="Mod" />
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 

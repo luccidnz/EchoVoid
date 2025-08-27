@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import EVoidButton from '../../components/ui/EVoidButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Screen from '../_layout/Screen';
 
 export default function OnboardingPrivacy({ navigation }: any) {
   return (
-    <View style={styles.flex}>
+    <Screen style={styles.flex}>
       <Text style={styles.title}>Privacy & Permissions</Text>
       <Text style={styles.body}>
         Ech0Void only requests permissions needed for audio recording and file access.{"\n"}
@@ -20,7 +21,7 @@ export default function OnboardingPrivacy({ navigation }: any) {
         await AsyncStorage.setItem('onboarded', '1');
         navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
       }} style={[styles.btn, { marginTop: 16, backgroundColor: '#333' }]} />
-    </View>
+    </Screen>
   );
 }
 

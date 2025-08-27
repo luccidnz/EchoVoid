@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { Text, TextInput, Pressable } from 'react-native';
 import * as MailComposer from 'expo-mail-composer';
 import { colors } from '../theme/colors';
+import Screen from './_layout/Screen';
+
 export default function FeedbackScreen(){
   const [msg,setMsg] = useState('');
   function send() {
@@ -22,12 +24,12 @@ export default function FeedbackScreen(){
     }
   }
   return (
-  <View style={{flex:1, backgroundColor:colors.bg, padding:16}}>
-  <Text style={{color:colors.text, marginBottom:8}}>Feedback</Text>
-  <TextInput value={msg} onChangeText={setMsg} placeholder="share your thoughts" placeholderTextColor="#555" multiline style={{borderColor:colors.neon,borderWidth:1,color:colors.text,padding:8,minHeight:120}}/>
-  <Pressable onPress={send} style={{marginTop:12,padding:12,borderWidth:1,borderColor:colors.neon,alignSelf:'flex-start'}}>
-  <Text style={{color:colors.neon}}>Send</Text>
+    <Screen style={{flex:1, backgroundColor:colors.bg, padding:16}}>
+      <Text style={{color:colors.text, marginBottom:8}}>Feedback</Text>
+      <TextInput value={msg} onChangeText={setMsg} placeholder="share your thoughts" placeholderTextColor="#555" multiline style={{borderColor:colors.neon,borderWidth:1,color:colors.text,padding:8,minHeight:120}}/>
+      <Pressable onPress={send} style={{marginTop:12,padding:12,borderWidth:1,borderColor:colors.neon,alignSelf:'flex-start'}}>
+        <Text style={{color:colors.neon}}>Send</Text>
       </Pressable>
-    </View>
+    </Screen>
   );
 }

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import getEntropy from '../services/rng/Entropy';
+import Screen from './_layout/Screen';
 
 const LETTERS = [
   ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
@@ -30,7 +31,7 @@ export default function SpiritBoard() {
   }, []);
 
   return (
-    <View style={styles.flex}>
+    <Screen style={styles.flex}>
       <Text style={styles.title}>Spirit Board</Text>
       <View style={styles.grid}>
         {LETTERS.map((row, r) => (
@@ -47,7 +48,7 @@ export default function SpiritBoard() {
         ))}
       </View>
       <Text style={styles.tip}>Pointer uses sensor entropy for movement</Text>
-    </View>
+    </Screen>
   );
 }
 

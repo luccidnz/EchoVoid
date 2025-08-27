@@ -1,17 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import EVoidButton from '../../components/ui/EVoidButton';
+import Screen from '../_layout/Screen';
 
 export default function OnboardingIntro({ navigation }: any) {
   return (
-    <View style={styles.flex}>
+    <Screen style={styles.flex}>
       <Text style={styles.title}>Welcome to Ech0Void</Text>
       <Text style={styles.body}>
         Ech0Void is a modern ITC toolkit for exploring anomalous audio, spirit communication, and creative consciousness. 
         Record, analyze, and share your sessions with a beautiful, intuitive interface.
       </Text>
       <EVoidButton label="How to Use" onPress={() => navigation?.navigate?.('OnboardingHowTo')} style={styles.btn} />
-    </View>
+    </Screen>
   );
 }
 

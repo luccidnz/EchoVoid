@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
+import Screen from './_layout/Screen';
 
 // Added type annotation for navigation prop
 const TransmissionScreen = ({ navigation }: { navigation: any }) => {
@@ -9,12 +10,14 @@ const TransmissionScreen = ({ navigation }: { navigation: any }) => {
   console.log('[TransmissionScreen] navigation prop:', navigation);
 
   return (
-    <LinearGradient colors={[colors.bg, '#0A0A1C', colors.card]} style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Text style={styles.h1}>Transmission</Text>
-        <Text style={styles.p}>Listening / responses will appear here.</Text>
-      </View>
-    </LinearGradient>
+    <Screen>
+      <LinearGradient colors={[colors.bg, '#0A0A1C', colors.card]} style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <Text style={styles.h1}>Transmission</Text>
+          <Text style={styles.p}>Listening / responses will appear here.</Text>
+        </View>
+      </LinearGradient>
+    </Screen>
   );
 };
 
