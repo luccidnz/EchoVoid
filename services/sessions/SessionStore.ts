@@ -67,6 +67,23 @@ async function update(id: string, data: any) {
   }
 }
 
+async function addSpike(id: string, spike: any) {
+  try {
+    const sessions = await list();
+    const idx = sessions.findIndex((s: any) => s.id === id);
+    if (idx !== -1) {
+      if (!sessions[idx].spikes) sessions[idx].spikes = [];
+      sessions[idx].spikes.push(spike);
+      await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Failed to record spike:', error);
+    return false;
+  }
+}
+
 async function deleteMedia(sessionId: string) {
   try {
     const mediaPath = `${MEDIA_DIR}${sessionId}/`;
@@ -96,6 +113,7 @@ export default {
   create,
   read,
   update,
+  addSpike,
   delete: _delete,
   list,
 };

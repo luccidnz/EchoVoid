@@ -25,6 +25,7 @@
     "expo-mail-composer": "~14.1.5",
     "expo-router": "~5.1.4",
     "expo-sensors": "~14.1.4",
+    "expo-location": "~18.1.0",
     "expo-sharing": "~13.1.5",
     "expo-speech": "~13.1.7",
     "expo-three": "^2.2.1",
