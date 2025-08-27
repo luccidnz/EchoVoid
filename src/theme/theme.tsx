@@ -1,11 +1,17 @@
+import React, { PropsWithChildren } from 'react';
+import { DefaultTheme, Theme as NavTheme } from '@react-navigation/native';
+import { colors } from './colors';
+import { ThemeProvider as BaseThemeProvider, useTheme, ThemeName } from '../../theme';
+
+// Re-export useTheme for convenience
+export { useTheme };
+
 // Custom theme colors for app screens (includes all keys)
 export const themeColors = {
   ...colors,
 };
-import React, { PropsWithChildren } from 'react';
-import { DefaultTheme, Theme as NavTheme } from '@react-navigation/native';
-import { colors } from './colors';
 
+// Navigation theme
 export const navTheme: NavTheme = {
   ...DefaultTheme,
   colors: {
@@ -19,30 +25,14 @@ export const navTheme: NavTheme = {
   },
 };
 
-import { ImageBackground, StyleSheet, View, Animated, Easing } from 'react-native';
+// Map theme name to background images
+export const backgroundAssets: Record<ThemeName, number> = {
+  Void: require('../../assets/bg-void.png'),
+  NeonFlux: require('../../assets/bg-neon.png'),
+  Astral: require('../../assets/bg-astral.png'),
+};
 
-export function ThemeProvider({ children }: PropsWithChildren) {
-
-  return (
-    <View style={{ flex: 1 }}>
-      {/* Gradient background for astral/spiritual effect */}
-      <View style={styles.gradientBg}>
-        {children}
-      </View>
-    </View>
-  );
+// Base theme provider wrapper
+export function ThemeProvider({ children }: PropsWithChildren<{}>) {
+  return <BaseThemeProvider>{children}</BaseThemeProvider>;
 }
-
-const styles = StyleSheet.create({
-  gradientBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: -1,
-    backgroundColor: '#2C1B0F', // lighter brown for better contrast
-  },
-  bg: { flex: 1, width: '100%', height: '100%', justifyContent: 'center', backgroundColor: '#2C1B0F' },
-  overlay: { flex: 1, opacity: 0.08, justifyContent: 'center' }, // lower overlay opacity for brightness
-});
