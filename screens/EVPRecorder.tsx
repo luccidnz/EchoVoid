@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import * as Recorder from '../services/audio/Recorder';
-import SessionStore from '../services/sessions/SessionStore';
+import SessionStore, { Session } from '../services/sessions/SessionStore';
 import SpectrogramPreview from '../components/evp/SpectrogramPreview';
 import { detectAnomalies } from '../src/core/anomaly/detector';
 
@@ -9,7 +9,7 @@ export default function EVPRecorder() {
   const [recording, setRecording] = useState(false);
   const [uri, setUri] = useState<string | null>(null);
   const [markers, setMarkers] = useState<number[]>([]);
-  const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [anomalies, setAnomalies] = useState<{ time: number; freq: number; confidence: number }[]>([]);
 
   const start = async () => {
     await Recorder.startRecording();
@@ -36,13 +36,13 @@ export default function EVPRecorder() {
 
   const saveSession = async () => {
     if (!uri) return;
-    const session = {
+    const session: Session = {
       id: Date.now().toString(),
       type: 'evp',
+      created: new Date().toISOString(),
+      anomalies: markers,
       uri,
-      markers,
-      anomalies,
-      date: new Date().toISOString(),
+      media: [uri],
     };
     await SessionStore.create(session);
     Alert.alert('Session Saved', 'Your EVP session has been saved to the logbook.');

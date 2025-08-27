@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Audio } from 'expo-av';
 import EVoidButton from '../ui/EVoidButton';
 import { shareSessionZip } from '../../services/export/zipSession';
+import { Session } from '../../services/sessions/SessionStore';
 
-export default function SessionDetail({ route }: any) {
+export default function SessionDetail({ route }: { route: { params: { session: Session } } }) {
   const session = route?.params?.session;
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);

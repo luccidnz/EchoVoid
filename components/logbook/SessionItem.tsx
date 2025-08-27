@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { Session } from '../../services/sessions/SessionStore';
 // TODO: Show session summary, type, date, and quick actions
-export default function SessionItem({ session, onDelete, onView }: { session: any; onDelete: () => void; onView: () => void }) {
+export default function SessionItem({ session, onDelete, onView }: { session: Session; onDelete: () => void; onView: () => void }) {
   return (
     <View style={styles.item}>
       <Text style={styles.type}>{session.type || 'Session'}</Text>

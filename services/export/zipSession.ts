@@ -2,9 +2,10 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as Crypto from 'expo-crypto';
+import { Session } from '../sessions/SessionStore';
 
 // Minimal zip: just copy JSON and media to a folder, return folder path (simulate zip)
-export default async function zipSession(session: any) {
+export default async function zipSession(session: Session) {
   const tmpDir = FileSystem.cacheDirectory + 'session_' + (await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, session.id)) + '/';
   await FileSystem.makeDirectoryAsync(tmpDir, { intermediates: true });
   // Write session JSON
@@ -21,7 +22,7 @@ export default async function zipSession(session: any) {
   return tmpDir;
 }
 
-export async function shareSessionZip(session: any) {
+export async function shareSessionZip(session: Session) {
   const zipPath = await zipSession(session);
   await Sharing.shareAsync(zipPath);
 }

@@ -10,6 +10,7 @@ import ARModeScreen from '../screens/ARModeScreen';
 
 import Logbook from '../../screens/Logbook';
 import SessionDetail from '../../components/logbook/SessionDetail';
+import { Session } from '../../services/sessions/SessionStore';
 import OnboardingIntro from '../../screens/Onboarding/Intro';
 import OnboardingHowTo from '../../screens/Onboarding/HowTo';
 import OnboardingPrivacy from '../../screens/Onboarding/Privacy';
@@ -22,7 +23,7 @@ export type RootStackParamList = {
   Settings: undefined;
   ARMode: undefined;
   Logbook: undefined;
-  SessionDetail: { session: any };
+  SessionDetail: { session: Session };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
