@@ -3,6 +3,8 @@ import { Magnetometer, Accelerometer } from 'expo-sensors';
 import { createEngine, PRESETS } from '../src/core/audio/evpEngine';
 import { WORD_BANK } from '../src/core/audio/wordBank';
 import LiveChain from '../services/audio/LiveChain';
+import SpectralAnalyzer from '../services/audio/spectralAnalyzer';
+import SessionStore from '../services/sessions/SessionStore';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { useTheme } from '../theme';
 import VU from '../components/controls/VU';
@@ -36,11 +38,22 @@ function LiveITC() {
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [anomalyCount, setAnomalyCount] = useState(0);
+  const [spectrum, setSpectrum] = useState<number[]>(Array(16).fill(0));
+  const anomaliesRef = useRef<number[]>([]);
+  const sessionIdRef = useRef<string | null>(null);
+  const sessionStartRef = useRef<number>(0);
+  const lastPeakRef = useRef<number>(0);
+  const recordingRef = useRef(false);
+  const THRESHOLD = 0.8;
   // Select a random word from the bank
   useEffect(() => {
     const idx = Math.floor(Math.random() * WORD_BANK.length);
     setWord(WORD_BANK[idx]);
   }, []);
+
+  useEffect(() => {
+    recordingRef.current = recording;
+  }, [recording]);
 
   // Sensor subscriptions
   useEffect(() => {
@@ -49,11 +62,40 @@ function LiveITC() {
   return () => { magSub.remove(); accSub.remove(); };
   }, []);
 
-  // Start/stop LiveChain (mic input) when enabled changes
+  // Start/stop LiveChain and spectral analyzer when enabled changes
   useEffect(() => {
-  if (enabled) {
+    if (enabled) {
+      LiveChain.startLiveChain({
+        onLevel: (n) => setVu(n),
+        gain,
+        fx,
+      });
+      liveChainActive.current = true;
+      SpectralAnalyzer.start({
+        fftSize: 512,
+        onSpectrum: (bins) => {
+          setSpectrum(bins.slice(0, 16));
+          const max = Math.max(...bins);
+          setVu(max);
+          setPeak((p) => (max > p ? max : p));
+          if (
+            recordingRef.current &&
+            max > THRESHOLD &&
+            Date.now() - lastPeakRef.current > 1000
+          ) {
+            const t = Date.now() - sessionStartRef.current;
+            anomaliesRef.current.push(t);
+            setAnomalyCount(anomaliesRef.current.length);
+            if (sessionIdRef.current) {
+              SessionStore.appendAnomaly(sessionIdRef.current, t);
+            }
+            lastPeakRef.current = Date.now();
+          }
+        },
+      });
     } else if (liveChainActive.current) {
       LiveChain.stopLiveChain();
+      SpectralAnalyzer.stop();
       liveChainActive.current = false;
       setVu(0);
     }
@@ -62,6 +104,7 @@ function LiveITC() {
         LiveChain.stopLiveChain();
         liveChainActive.current = false;
       }
+      SpectralAnalyzer.stop();
     };
   }, [enabled]);
 
@@ -84,19 +127,30 @@ function LiveITC() {
   }, []);
 
   // Implement recording, anomaly marking, and playback logic
-  const handleRecord = () => {
+  const handleRecord = async () => {
     console.log('Recording started');
+    const id = Date.now().toString();
+    sessionIdRef.current = id;
+    sessionStartRef.current = Date.now();
+    anomaliesRef.current = [];
+    await SessionStore.create({ id, type: 'live', created: Date.now(), anomalies: [] });
+    setAnomalyCount(0);
     setRecording(true);
   };
 
-  const handleStop = () => {
+  const handleStop = async () => {
     console.log('Recording stopped');
     setRecording(false);
+    sessionIdRef.current = null;
   };
 
   const handleMarkAnomaly = () => {
     console.log('Anomaly marked');
-    setAnomalyCount((count) => count + 1);
+    if (!recordingRef.current || !sessionIdRef.current) return;
+    const t = Date.now() - sessionStartRef.current;
+    anomaliesRef.current.push(t);
+    setAnomalyCount(anomaliesRef.current.length);
+    SessionStore.appendAnomaly(sessionIdRef.current, t);
   };
 
   const handlePlay = () => {
@@ -126,7 +180,7 @@ function LiveITC() {
           {word && <Text style={{ color: theme.colors.accent, fontSize: 18, marginTop: 8 }}>ITC Word: {word}</Text>}
         </View>
       </View>
-      <AudioReactiveBars />
+      <AudioReactiveBars spectrum={spectrum} />
       <View style={styles.row}>
         <VU value={vu} peak={peak} />
         <Knob value={gain} onChange={setGain} min={0} max={1} label="Gain" format="" />
