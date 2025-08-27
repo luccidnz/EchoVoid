@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import buildSigil from '../services/sigil/buildSigil';
+import { scaleFont } from 'src/utils/scale';
 
 export default function SigilMaker() {
   const [phrase, setPhrase] = useState('');
@@ -34,7 +35,7 @@ export default function SigilMaker() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  title: { fontSize: 24, marginBottom: 16 },
+  title: { fontSize: scaleFont(24), marginBottom: 16 },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 8, width: '100%', marginBottom: 16 },
   button: { color: 'blue', marginBottom: 16 },
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
+import { scaleFont } from 'src/utils/scale';
 
 type Props = {
   label: string;
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: '700',
     letterSpacing: 0.4,
   },

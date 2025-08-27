@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme, themes, ThemeName } from '../theme';
 import Chip from '../components/controls/Chip';
+import { scaleFont } from 'src/utils/scale';
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
@@ -23,6 +24,6 @@ export default function Settings() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, padding: 24 },
-  title: { fontSize: 28, fontWeight: '800', marginBottom: 24 },
-  label: { fontSize: 16, fontWeight: '600', marginTop: 18 },
+  title: { fontSize: scaleFont(28), fontWeight: '800', marginBottom: 24 },
+  label: { fontSize: scaleFont(16), fontWeight: '600', marginTop: 18 },
 });

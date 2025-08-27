@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme';
+import { scaleFont } from 'src/utils/scale';
 
 type Props = {
   label: string;
@@ -17,6 +18,7 @@ export default function EVoidButton({ label, onPress, variant = 'solid', style, 
     <Pressable
       testID={testID}
       accessibilityRole="button"
+      accessibilityLabel={label}
       hitSlop={12}
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [
@@ -37,5 +39,5 @@ export default function EVoidButton({ label, onPress, variant = 'solid', style, 
 }
 const styles = StyleSheet.create({
   btn: { paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center', marginVertical: 4 },
-  text: { fontSize: 16, fontWeight: '700', letterSpacing: 0.4 },
+  text: { fontSize: scaleFont(16), fontWeight: '700', letterSpacing: 0.4 },
 });

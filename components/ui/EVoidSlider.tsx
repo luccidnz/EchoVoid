@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useTheme } from '../../theme';
+import { scaleFont } from 'src/utils/scale';
 
 type Props = { value: number; onValueChange: (v: number) => void; min?: number; max?: number; step?: number; label?: string };
 export default function EVoidSlider({ value, onValueChange, min = 0, max = 1, step = 0.01, label }: Props) {
@@ -19,12 +20,14 @@ export default function EVoidSlider({ value, onValueChange, min = 0, max = 1, st
         maximumTrackTintColor={theme.colors.surface}
         thumbTintColor={theme.colors.primary}
         style={styles.slider}
+        accessibilityRole="adjustable"
+        accessibilityLabel={label || 'slider'}
       />
     </View>
   );
 }
 const styles = StyleSheet.create({
   wrap: { width: '100%', marginVertical: 8 },
-  label: { marginBottom: 4, fontWeight: '600' },
+  label: { marginBottom: 4, fontWeight: '600', fontSize: scaleFont(14) },
   slider: { width: '100%' },
 });

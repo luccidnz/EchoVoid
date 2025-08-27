@@ -33,3 +33,9 @@ npm test
 
 This scaffold includes stubs for cloud sync, shared sessions, anomaly detection, AR mode, voice cloning, advanced sweep presets, accessibility themes, privacy controls, and feedback channels.
 
+## Accessibility
+
+The app supports scalable typography and a high-contrast color palette.
+- Enable **High Contrast** from the Settings screen to switch to a simplified, high-visibility theme.
+- Text automatically adjusts based on system font settings and screen reader preferences.
+

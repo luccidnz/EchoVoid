@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { themeColors } from '../theme/theme';
+import { scaleFont } from 'src/utils/scale';
 
 const { width, height } = Dimensions.get('window');
 
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   title: {
-    fontSize: 38,
+    fontSize: scaleFont(38),
     fontWeight: '900',
     letterSpacing: 2,
     textShadowColor: '#000a',
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 12,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: scaleFont(18),
     fontWeight: '500',
     marginTop: 10,
     marginBottom: 32,
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: scaleFont(18),
     fontWeight: '700',
     letterSpacing: 1,
   },

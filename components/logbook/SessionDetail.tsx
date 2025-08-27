@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Audio } from 'expo-av';
 import EVoidButton from '../ui/EVoidButton';
 import { shareSessionZip } from '../../services/export/zipSession';
+import { scaleFont } from 'src/utils/scale';
 
 export default function SessionDetail({ route }: any) {
   const session = route?.params?.session;
@@ -62,7 +63,7 @@ export default function SessionDetail({ route }: any) {
 }
 const styles = StyleSheet.create({
   detail: { flex: 1, padding: 20, backgroundColor: '#111' },
-  title: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 16 },
+  title: { fontSize: scaleFont(24), fontWeight: '800', color: '#fff', marginBottom: 16 },
   label: { color: '#aaa', fontWeight: '600', marginTop: 12 },
-  value: { color: '#fff', fontSize: 15, marginTop: 2 },
+  value: { color: '#fff', fontSize: scaleFont(15), marginTop: 2 },
 });

@@ -6,6 +6,7 @@ import type { RootStackParamList } from '../navigation/AppNavigator';
 import UIButton from '../components/UIButton';
 import { colors } from '../theme/colors';
 import { hasNativeVoice, startListening } from '../voice/adapter';
+import { scaleFont } from 'src/utils/scale';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -59,10 +60,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   title: {
-    color: colors.text, fontSize: 44, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase',
+    color: colors.text, fontSize: scaleFont(44), fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase',
   },
   subtitle: {
-    color: colors.subtext, marginTop: 6, marginBottom: 18,
+    color: colors.subtext,
+    fontSize: scaleFont(18),
+    marginTop: 6,
+    marginBottom: 18,
   },
   btn: {
     width: '90%',

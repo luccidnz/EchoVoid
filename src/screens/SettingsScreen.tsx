@@ -1,23 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { colors } from '../theme/colors';
+import { View, Text, StyleSheet, Switch } from 'react-native';
+import { useTheme, themes, ThemeName } from '../../theme';
+import Chip from '../../components/controls/Chip';
+import { scaleFont } from 'src/utils/scale';
 
-export default function SettingsScreen({ navigation }: { navigation: any }) {
-  // Log navigation prop
-  console.log('[SettingsScreen] navigation prop:', navigation);
-
+export default function SettingsScreen() {
+  const { theme, setTheme, highContrast, setHighContrast } = useTheme();
   return (
-    <LinearGradient colors={[colors.bg, '#0A0A1C', colors.card]} style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Text style={styles.h1}>Settings</Text>
-        <Text style={styles.p}>(Add prefs like voice, theme, logging here)</Text>
-      </View>
-    </LinearGradient>
+    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
+      <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
+      <Text style={[styles.label, { color: theme.colors.text }]}>Theme</Text>
+      <Chip options={Object.keys(themes) as ThemeName[]} value={theme.name} onChange={v => setTheme(v as ThemeName)} />
+        <View style={styles.row}>
+          <Text style={[styles.label, { color: theme.colors.text }]}>High Contrast</Text>
+          <Switch value={highContrast} onValueChange={setHighContrast} accessibilityLabel="High Contrast" />
+        </View>
+    </View>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  h1: { color: colors.text, fontSize: 28, fontWeight: '700' },
-  p: { color: colors.subtext, marginTop: 8 },
+  flex: { flex: 1, padding: 24 },
+  title: { fontSize: scaleFont(28), fontWeight: '800', marginBottom: 24 },
+  label: { fontSize: scaleFont(16), fontWeight: '600', marginTop: 18 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 },
 });
