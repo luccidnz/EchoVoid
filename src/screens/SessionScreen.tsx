@@ -5,9 +5,11 @@ import { colors } from '../theme/colors';
 import Meter from '../components/Meter';
 import Visualizer from '../components/Visualizer';
 import Toggle from '../components/Toggle';
+import SpectralWaterfall from '../components/SpectralWaterfall';
 import { speakEsmera } from '../core/audio/tts';
 import { useTranscription } from '../core/audio/transcription';
 import { detectAnomalies, setSensitivity } from '../core/anomaly/detector';
+import { fft } from '../utils/signal';
 
 export default function SessionScreen({navigation}:any){
   const { engine, session, start, stop, sync } = useSession();
@@ -15,12 +17,19 @@ export default function SessionScreen({navigation}:any){
   const [amp,setAmp] = useState(0);
   const [mode,setMode] = useState<'Standard'|'Mana'|'Reverse'|'DreamLink'|'Shadow'|'CallAndResponse'>('Standard');
   const [hits,setHits] = useState<any[]>([]);
+  const [spectra,setSpectra] = useState<number[][]>([]);
 
   useEffect(()=> engine.level$(setAmp), [engine]);
   useEffect(()=>{ const det = setInterval(()=>{
     const arr = detectAnomalies(new Float32Array(10));
     if(arr.length) setHits(h=>[...h,...arr]);
   },1000); return ()=>clearInterval(det); },[]);
+
+  useEffect(()=>{ const id = setInterval(()=>{
+    const samples = Float32Array.from({length:64},()=>Math.random()*2-1);
+    const bins = fft(samples);
+    setSpectra(s=>[...s.slice(-50), bins]);
+  },250); return ()=>clearInterval(id); },[]);
 
   const onSpeak = ()=> speakEsmera(text || 'Welcome to EchoVoid.', !text);
 
@@ -36,6 +45,7 @@ export default function SessionScreen({navigation}:any){
   <Text style={{color:colors.text, fontSize:18}}>Sweep / Meter</Text>
       <Visualizer level={amp}/>
     <Meter level={amp} color={colors.neon}/>
+  <SpectralWaterfall data={spectra} />
 
   <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Transcript</Text>
   <Text style={{color:colors.neon}}>{text || '…listening…'}</Text>
