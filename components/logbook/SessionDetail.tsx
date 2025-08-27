@@ -3,11 +3,15 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Audio } from 'expo-av';
 import EVoidButton from '../ui/EVoidButton';
 import { shareSessionZip } from '../../services/export/zipSession';
+import { useTheme } from '../../theme';
+import { useDesignSystem } from '../../theme/designSystem';
 
 export default function SessionDetail({ route }: any) {
   const session = route?.params?.session;
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const { theme } = useTheme();
+  const { spacing, typography } = useDesignSystem();
 
   const handlePlay = async () => {
     if (!session?.uri) return;
@@ -34,8 +38,14 @@ export default function SessionDetail({ route }: any) {
     } catch {}
   };
 
+  const styles = StyleSheet.create({
+    detail: { flex: 1, padding: spacing.xl, backgroundColor: theme.colors.bg },
+    title: { ...typography.h2, color: theme.colors.text, marginBottom: spacing.lg },
+    label: { color: theme.colors.text + '99', ...typography.label, marginTop: spacing.md },
+    value: { color: theme.colors.text, fontSize: 15, marginTop: spacing.xs },
+  });
   return (
-    <ScrollView style={styles.detail} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={styles.detail} contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
       <Text style={styles.title}>Session Detail</Text>
       <Text style={styles.label}>Type:</Text>
       <Text style={styles.value}>{session?.type || 'Session'}</Text>
@@ -46,7 +56,7 @@ export default function SessionDetail({ route }: any) {
       <EVoidButton
         label={playing ? 'Stop Playback' : 'Play Recording'}
         onPress={handlePlay}
-        style={{ marginVertical: 16, minWidth: 140 }}
+        style={{ marginVertical: spacing.lg, minWidth: 140 }}
       />
       <Text style={styles.label}>Anomaly Timestamps:</Text>
       {session?.anomalies?.length ? (
@@ -56,13 +66,7 @@ export default function SessionDetail({ route }: any) {
       ) : (
         <Text style={styles.value}>None</Text>
       )}
-  <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: 24 }} />
+      <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: spacing.xxl }} />
     </ScrollView>
   );
 }
-const styles = StyleSheet.create({
-  detail: { flex: 1, padding: 20, backgroundColor: '#111' },
-  title: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 16 },
-  label: { color: '#aaa', fontWeight: '600', marginTop: 12 },
-  value: { color: '#fff', fontSize: 15, marginTop: 2 },
-});

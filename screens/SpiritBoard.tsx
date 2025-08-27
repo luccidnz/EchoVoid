@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import getEntropy from '../services/rng/Entropy';
+import { useTheme } from '../theme';
+import { useDesignSystem } from '../theme/designSystem';
 
 const LETTERS = [
   ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
@@ -12,6 +14,8 @@ const LETTERS = [
 
 export default function SpiritBoard() {
   const [pointer, setPointer] = useState({ row: 1, col: 3 });
+  const { theme } = useTheme();
+  const { spacing, typography } = useDesignSystem();
 
   // Use entropy from sensors for pointer movement
   useEffect(() => {
@@ -29,6 +33,24 @@ export default function SpiritBoard() {
     return () => clearInterval(interval);
   }, []);
 
+  const styles = StyleSheet.create({
+    flex: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.bg },
+    title: { ...typography.h1, color: theme.colors.text, marginBottom: spacing.xxl },
+    grid: { marginBottom: spacing.xxxl },
+    row: { flexDirection: 'row' },
+    cell: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: theme.colors.surface,
+      margin: spacing.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pointer: { backgroundColor: theme.colors.accent, borderWidth: 2, borderColor: theme.colors.text },
+    letter: { color: theme.colors.text, fontSize: 22, fontWeight: '700' },
+    tip: { color: theme.colors.text + '99', fontSize: 13, marginTop: spacing.md },
+  });
   return (
     <View style={styles.flex}>
       <Text style={styles.title}>Spirit Board</Text>
@@ -50,14 +72,3 @@ export default function SpiritBoard() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
-  grid: { marginBottom: 32 },
-  row: { flexDirection: 'row' },
-  cell: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#222', margin: 6, alignItems: 'center', justifyContent: 'center' },
-  pointer: { backgroundColor: '#00E0FF', borderWidth: 2, borderColor: '#fff' },
-  letter: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  tip: { color: '#aaa', fontSize: 13, marginTop: 12 },
-});
