@@ -28,13 +28,19 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AppNavigator() {
-  // Log navigation container state
-  console.log('[AppNavigator] Navigation state:', Stack.Navigator);
+  // Log navigation container state in development
+  if (__DEV__) {
+    console.log('[AppNavigator] Navigation state:', Stack.Navigator);
+  }
 
   return (
     <NavigationContainer
       theme={navTheme}
-      onStateChange={(state) => console.log('[AppNavigator] Navigation state changed:', state)}
+      onStateChange={(state) => {
+        if (__DEV__) {
+          console.log('[AppNavigator] Navigation state changed:', state);
+        }
+      }}
     >
       <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
