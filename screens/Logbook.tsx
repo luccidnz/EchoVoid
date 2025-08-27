@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import SessionStore from '../services/sessions/SessionStore';
 import SessionItem from '../components/logbook/SessionItem';
 
@@ -12,6 +12,15 @@ export default function Logbook({ navigation }: any) {
     })();
   }, []);
 
+  const handleDelete = async (id: string) => {
+    await SessionStore.delete(id);
+    setSessions((s) => s.filter((sess) => sess.id !== id));
+  };
+
+  const handleView = (session: any) => {
+    navigation?.navigate?.('SessionDetail', { session });
+  };
+
   return (
     <View style={styles.flex}>
       <Text style={styles.title}>Logbook</Text>
@@ -19,9 +28,11 @@ export default function Logbook({ navigation }: any) {
         data={sessions}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation?.navigate?.('SessionDetail', { session: item })}>
-            <SessionItem session={item} />
-          </TouchableOpacity>
+          <SessionItem
+            session={item}
+            onView={() => handleView(item)}
+            onDelete={() => handleDelete(item.id)}
+          />
         )}
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={<Text style={styles.empty}>No sessions yet.</Text>}
