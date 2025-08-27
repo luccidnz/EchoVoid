@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import SessionStore from '../services/sessions/SessionStore';
 import SessionItem from '../components/logbook/SessionItem';
+import { useTheme, Theme } from '../theme';
 
 export default function Logbook({ navigation }: any) {
   const [sessions, setSessions] = useState<any[]>([]);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   useEffect(() => {
     (async () => {
       const list = await SessionStore.list();
@@ -30,8 +33,10 @@ export default function Logbook({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', margin: 16 },
-  empty: { color: '#888', textAlign: 'center', marginTop: 40 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1, backgroundColor: '#111' },
+    title: { ...theme.typography.heading1, color: '#fff', margin: 16 },
+    empty: { ...theme.typography.body, color: '#888', textAlign: 'center', marginTop: 40 },
+  });
+}

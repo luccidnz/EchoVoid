@@ -4,12 +4,15 @@ import * as Recorder from '../services/audio/Recorder';
 import SessionStore from '../services/sessions/SessionStore';
 import SpectrogramPreview from '../components/evp/SpectrogramPreview';
 import { detectAnomalies } from '../src/core/anomaly/detector';
+import { useTheme, Theme } from '../theme';
 
 export default function EVPRecorder() {
   const [recording, setRecording] = useState(false);
   const [uri, setUri] = useState<string | null>(null);
   const [markers, setMarkers] = useState<number[]>([]);
   const [anomalies, setAnomalies] = useState<any[]>([]);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   const start = async () => {
     await Recorder.startRecording();
@@ -85,9 +88,11 @@ export default function EVPRecorder() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 16 },
-  status: { marginBottom: 24 },
-  buttons: { gap: 12 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    title: { ...theme.typography.heading1, marginBottom: 16 },
+    status: { marginBottom: 24 },
+    buttons: { gap: 12 },
+  });
+}

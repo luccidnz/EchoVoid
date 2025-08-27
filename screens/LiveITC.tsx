@@ -4,7 +4,7 @@ import { createEngine, PRESETS } from '../src/core/audio/evpEngine';
 import { WORD_BANK } from '../src/core/audio/wordBank';
 import LiveChain from '../services/audio/LiveChain';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, Theme } from '../theme';
 import VU from '../components/controls/VU';
 import Knob from '../components/controls/Knob';
 import EVoidSlider from '../components/controls/Slider';
@@ -19,6 +19,7 @@ import EVoidButton from '../components/ui/EVoidButton';
 
 function LiveITC() {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const engineRef = useRef(null);
   const liveChainActive = useRef(false);
   const [gain, setGain] = useState(0.7);
@@ -105,7 +106,7 @@ function LiveITC() {
   };
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
+    <SafeAreaView style={[styles.flex, { backgroundColor: theme.colors.bg }]}>
       <NoiseOverlay />
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.colors.text }]}>Live ITC</Text>
@@ -116,14 +117,12 @@ function LiveITC() {
           <EVoidButton label={playing ? "Stop" : "Play"} onPress={playing ? () => setPlaying(false) : handlePlay} />
         </View>
         {recordingUri && (
-          <Text style={{ color: theme.colors.accent, fontSize: 14, marginTop: 8 }}>
-            Recording saved: {recordingUri}
-          </Text>
+          <Text style={[theme.typography.caption, { color: theme.colors.accent, marginTop: 8 }]}>Recording saved: {recordingUri}</Text>
         )}
         <View style={{ marginTop: 12 }}>
-          <Text style={{ color: theme.colors.text, fontSize: 12 }}>Magnetometer: {mag.map(v => v.toFixed(2)).join(', ')}</Text>
-          <Text style={{ color: theme.colors.text, fontSize: 12 }}>Accelerometer: {acc.map(v => v.toFixed(2)).join(', ')}</Text>
-          {word && <Text style={{ color: theme.colors.accent, fontSize: 18, marginTop: 8 }}>ITC Word: {word}</Text>}
+          <Text style={[theme.typography.small, { color: theme.colors.text }]}>Magnetometer: {mag.map(v => v.toFixed(2)).join(', ')}</Text>
+          <Text style={[theme.typography.small, { color: theme.colors.text }]}>Accelerometer: {acc.map(v => v.toFixed(2)).join(', ')}</Text>
+          {word && <Text style={[theme.typography.heading3, { color: theme.colors.accent, marginTop: 8 }]}>ITC Word: {word}</Text>}
         </View>
       </View>
       <AudioReactiveBars />
@@ -141,10 +140,12 @@ function LiveITC() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  header: { alignItems: 'center', marginTop: 16, marginBottom: 8 },
-  title: { fontSize: 28, fontWeight: '800', letterSpacing: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginVertical: 12 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    header: { alignItems: 'center', marginTop: 16, marginBottom: 8 },
+    title: { ...theme.typography.heading1, letterSpacing: 1 },
+    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginVertical: 12 },
+  });
+}
 

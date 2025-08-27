@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import buildSigil from '../services/sigil/buildSigil';
+import { useTheme, Theme } from '../theme';
 
 export default function SigilMaker() {
   const [phrase, setPhrase] = useState('');
   const [sigilPath, setSigilPath] = useState('');
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   const handleGenerate = () => {
     setSigilPath(buildSigil(phrase));
@@ -32,9 +35,11 @@ export default function SigilMaker() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  title: { fontSize: 24, marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 8, width: '100%', marginBottom: 16 },
-  button: { color: 'blue', marginBottom: 16 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
+    title: { ...theme.typography.heading2, marginBottom: 16 },
+    input: { borderWidth: 1, borderColor: '#ccc', padding: 8, width: '100%', marginBottom: 16 },
+    button: { ...theme.typography.button, color: 'blue', marginBottom: 16 },
+  });
+}

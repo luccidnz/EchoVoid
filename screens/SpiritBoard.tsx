@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import getEntropy from '../services/rng/Entropy';
+import { useTheme, Theme } from '../theme';
 
 const LETTERS = [
   ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
@@ -12,6 +13,8 @@ const LETTERS = [
 
 export default function SpiritBoard() {
   const [pointer, setPointer] = useState({ row: 1, col: 3 });
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   // Use entropy from sensors for pointer movement
   useEffect(() => {
@@ -51,13 +54,15 @@ export default function SpiritBoard() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
-  grid: { marginBottom: 32 },
-  row: { flexDirection: 'row' },
-  cell: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#222', margin: 6, alignItems: 'center', justifyContent: 'center' },
-  pointer: { backgroundColor: '#00E0FF', borderWidth: 2, borderColor: '#fff' },
-  letter: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  tip: { color: '#aaa', fontSize: 13, marginTop: 12 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111' },
+    title: { ...theme.typography.heading1, color: '#fff', marginBottom: 24 },
+    grid: { marginBottom: 32 },
+    row: { flexDirection: 'row' },
+    cell: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#222', margin: 6, alignItems: 'center', justifyContent: 'center' },
+    pointer: { backgroundColor: '#00E0FF', borderWidth: 2, borderColor: '#fff' },
+    letter: { ...theme.typography.heading3, fontSize: 22, color: '#fff' },
+    tip: { ...theme.typography.caption, color: '#aaa', marginTop: 12 },
+  });
+}

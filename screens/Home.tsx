@@ -1,7 +1,7 @@
 
 
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { useTheme } from '../theme';
+import { useTheme, Theme } from '../theme';
 import ParticleField from '../components/fx/ParticleField';
 import EVoidButton from '../components/ui/EVoidButton';
 
@@ -11,9 +11,10 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function Home() {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
+    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}>
       <ParticleField />
       <View style={styles.center}>
         <Image source={require('../assets/logo.svg')} style={{ width: 96, height: 96, marginBottom: 16 }} />
@@ -27,10 +28,12 @@ export default function Home() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
-  title: { fontSize: 40, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
-  subtitle: { fontSize: 16, marginBottom: 24, fontWeight: '600' },
-  btn: { width: 220, marginVertical: 6 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
+    title: { ...theme.typography.display, textTransform: 'uppercase' },
+    subtitle: { ...theme.typography.label, marginBottom: 24 },
+    btn: { width: 220, marginVertical: 6 },
+  });
+}

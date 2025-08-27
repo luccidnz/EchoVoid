@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '../../theme';
+import { useTheme, Theme } from '../../theme';
 
 type Props = {
   label: string;
@@ -13,6 +13,7 @@ type Props = {
 
 export default function EVoidButton({ label, onPress, variant = 'solid', style, testID, disabled = false }: Props) {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   return (
     <Pressable
       testID={testID}
@@ -35,7 +36,10 @@ export default function EVoidButton({ label, onPress, variant = 'solid', style, 
     </Pressable>
   );
 }
-const styles = StyleSheet.create({
-  btn: { paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center', marginVertical: 4 },
-  text: { fontSize: 16, fontWeight: '700', letterSpacing: 0.4 },
-});
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    btn: { paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center', marginVertical: 4 },
+    text: { ...theme.typography.button },
+  });
+}

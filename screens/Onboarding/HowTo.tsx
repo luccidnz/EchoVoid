@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import EVoidButton from '../../components/ui/EVoidButton';
+import { useTheme, Theme } from '../../theme';
 
 export default function OnboardingHowTo({ navigation }: any) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   return (
     <View style={styles.flex}>
       <Text style={styles.title}>How to Use Ech0Void</Text>
@@ -17,9 +20,11 @@ export default function OnboardingHowTo({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
-  body: { color: '#ccc', fontSize: 16, textAlign: 'center', marginBottom: 32 },
-  btn: { minWidth: 160 },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    flex: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#111' },
+    title: { ...theme.typography.heading1, color: '#fff', marginBottom: 24 },
+    body: { ...theme.typography.body, color: '#ccc', textAlign: 'center', marginBottom: 32 },
+    btn: { minWidth: 160 },
+  });
+}

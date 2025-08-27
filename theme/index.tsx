@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, PropsWithChildren } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { typography } from '../src/theme/typography';
 
 export type ThemeName = 'Void' | 'NeonFlux' | 'Astral';
 
@@ -17,6 +18,7 @@ export interface Theme {
   radii: number[];
   shadow: string;
   opacity: { [k: string]: number };
+  typography: typeof typography;
 }
 
 export const themes: Record<ThemeName, Theme> = {
@@ -29,6 +31,7 @@ export const themes: Record<ThemeName, Theme> = {
     radii: [0, 6, 12, 20],
     shadow: '0 2px 8px #0008',
     opacity: { disabled: 0.4, overlay: 0.12 },
+    typography,
   },
   NeonFlux: {
     name: 'NeonFlux',
@@ -39,6 +42,7 @@ export const themes: Record<ThemeName, Theme> = {
     radii: [0, 6, 12, 20],
     shadow: '0 2px 8px #0008',
     opacity: { disabled: 0.4, overlay: 0.12 },
+    typography,
   },
   Astral: {
     name: 'Astral',
@@ -49,6 +53,7 @@ export const themes: Record<ThemeName, Theme> = {
     radii: [0, 6, 12, 20],
     shadow: '0 2px 8px #0008',
     opacity: { disabled: 0.4, overlay: 0.12 },
+    typography,
   },
 };
 

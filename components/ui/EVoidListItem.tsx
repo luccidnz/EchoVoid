@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '../../theme';
+import { useTheme, Theme } from '../../theme';
 
 type Props = { title: string; subtitle?: string; right?: React.ReactNode; style?: ViewStyle | ViewStyle[] };
 export default function EVoidListItem({ title, subtitle, right, style }: Props) {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   return (
     <View style={[styles.item, { backgroundColor: theme.colors.surface }, style]}>
       <View style={{ flex: 1 }}>
@@ -15,8 +16,11 @@ export default function EVoidListItem({ title, subtitle, right, style }: Props) 
     </View>
   );
 }
-const styles = StyleSheet.create({
-  item: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginVertical: 4 },
-  title: { fontWeight: '700', fontSize: 16 },
-  subtitle: { fontSize: 13, marginTop: 2 },
-});
+
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    item: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginVertical: 4 },
+    title: { ...theme.typography.body, fontWeight: '700' },
+    subtitle: { ...theme.typography.caption, marginTop: 2 },
+  });
+}
