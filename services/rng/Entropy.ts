@@ -13,11 +13,11 @@ export default async function getEntropy() {
       const recordingOptions = {
         android: {
           extension: '.m4a',
-          outputFormat: 2, // Default MPEG_4
-          audioEncoder: 3, // Default AAC
-          sampleRate: 44100,
-          numberOfChannels: 2,
-          bitRate: 128000,
+          outputFormat: 2, // MPEG_4
+          audioEncoder: 3, // AAC
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          bitRate: 64000,
         },
         ios: {
           extension: '.caf',
