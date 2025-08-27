@@ -1,10 +1,10 @@
-// Custom theme colors for app screens (includes all keys)
-export const themeColors = {
-  ...colors,
-};
+import { colors } from './colors';
 import React, { PropsWithChildren } from 'react';
 import { DefaultTheme, Theme as NavTheme } from '@react-navigation/native';
-import { colors } from './colors';
+import { StyleSheet, View } from 'react-native';
+
+// Custom theme colors for app screens (includes all keys)
+export const themeColors = colors;
 
 export const navTheme: NavTheme = {
   ...DefaultTheme,
@@ -19,10 +19,7 @@ export const navTheme: NavTheme = {
   },
 };
 
-import { ImageBackground, StyleSheet, View, Animated, Easing } from 'react-native';
-
 export function ThemeProvider({ children }: PropsWithChildren) {
-
   return (
     <View style={{ flex: 1 }}>
       {/* Gradient background for astral/spiritual effect */}
