@@ -1,33 +1,41 @@
 import { useCallback, useEffect, useState } from 'react';
-import { MMKV } from 'react-native-mmkv';
-
-const storage = new MMKV();
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function usePrefs<T = any>(key: string, initial: T): [T, (v: T) => void] {
-  const [value, setValue] = useState<T>(() => {
-    const stored = storage.getString(key);
-    if (stored !== undefined) {
-      try { return JSON.parse(stored); } catch {}
-    }
-    return initial;
-  });
+  const [value, setValue] = useState<T>(initial);
 
   useEffect(() => {
-    storage.set(key, JSON.stringify(value));
-  }, [key, value]);
+    AsyncStorage.getItem(key).then((stored) => {
+      if (stored !== null) {
+        try {
+          setValue(JSON.parse(stored));
+        } catch {
+          // ignore parse errors and fall back to initial value
+        }
+      }
+    });
+  }, [key]);
 
-  const set = useCallback((v: T) => setValue(v), []);
+  const set = useCallback((v: T) => {
+    setValue(v);
+    AsyncStorage.setItem(key, JSON.stringify(v));
+  }, [key]);
+
   return [value, set];
 }
 
 export const prefs = {
-  get: <T = any>(key: string, fallback?: T): T | undefined => {
-    const stored = storage.getString(key);
-    if (stored !== undefined) {
-      try { return JSON.parse(stored); } catch {}
+  get: async <T = any>(key: string, fallback?: T): Promise<T | undefined> => {
+    const stored = await AsyncStorage.getItem(key);
+    if (stored !== null) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        // ignore parse errors
+      }
     }
     return fallback;
   },
-  set: (key: string, value: any) => storage.set(key, JSON.stringify(value)),
-  remove: (key: string) => storage.delete(key),
+  set: (key: string, value: any) => AsyncStorage.setItem(key, JSON.stringify(value)),
+  remove: (key: string) => AsyncStorage.removeItem(key),
 };
