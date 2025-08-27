@@ -36,7 +36,19 @@ function AppNavigator() {
       theme={navTheme}
       onStateChange={(state) => console.log('[AppNavigator] Navigation state changed:', state)}
     >
-      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Welcome"
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          // provide a distinct animation for a few key routes
+          animation:
+            route.name === 'Welcome'
+              ? 'fade_from_bottom'
+              : route.name === 'ARMode'
+              ? 'slide_from_bottom'
+              : 'slide_from_right',
+        })}
+      >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Transmission" component={TransmissionScreen} />

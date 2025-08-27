@@ -11,6 +11,7 @@ import OnboardingPrivacy from './screens/Onboarding/Privacy';
 import { Magnetometer, Accelerometer } from 'expo-sensors';
 import { Alert } from 'react-native';
 import TestNavigator from './src/navigation/TestNavigator';
+import PortalBackground from './src/components/PortalBackground';
 
 const Stack = createNativeStackNavigator();
 
@@ -81,6 +82,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <PortalBackground />
       <ThemeProvider>
         <EsmeraProvider>
           <NavigationContainer>
