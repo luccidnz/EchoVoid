@@ -92,10 +92,29 @@ async function _delete(id: string) {
   }
 }
 
+async function appendPrompt(id: string, text: string) {
+  try {
+    const sessions = await list();
+    const idx = sessions.findIndex((s: any) => s.id === id);
+    if (idx !== -1) {
+      const prompts = sessions[idx].prompts || [];
+      prompts.push({ text, at: Date.now() });
+      sessions[idx].prompts = prompts;
+      await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Failed to append prompt:', error);
+    return false;
+  }
+}
+
 export default {
   create,
   read,
   update,
   delete: _delete,
   list,
+  appendPrompt,
 };
