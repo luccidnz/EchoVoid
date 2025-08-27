@@ -4,6 +4,7 @@ import * as Recorder from '../services/audio/Recorder';
 import SessionStore from '../services/sessions/SessionStore';
 import SpectrogramPreview from '../components/evp/SpectrogramPreview';
 import { detectAnomalies } from '../src/core/anomaly/detector';
+import { scaleFont } from 'src/utils/scale';
 
 export default function EVPRecorder() {
   const [recording, setRecording] = useState(false);
@@ -87,7 +88,7 @@ export default function EVPRecorder() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 16 },
+  title: { fontSize: scaleFont(28), fontWeight: 'bold', marginBottom: 16 },
   status: { marginBottom: 24 },
   buttons: { gap: 12 },
 });

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import getEntropy from '../services/rng/Entropy';
+import { scaleFont } from 'src/utils/scale';
 
 const LETTERS = [
   ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
@@ -53,11 +54,11 @@ export default function SpiritBoard() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
+  title: { fontSize: scaleFont(28), fontWeight: '800', color: '#fff', marginBottom: 24 },
   grid: { marginBottom: 32 },
   row: { flexDirection: 'row' },
   cell: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#222', margin: 6, alignItems: 'center', justifyContent: 'center' },
   pointer: { backgroundColor: '#00E0FF', borderWidth: 2, borderColor: '#fff' },
-  letter: { color: '#fff', fontSize: 22, fontWeight: '700' },
-  tip: { color: '#aaa', fontSize: 13, marginTop: 12 },
+  letter: { color: '#fff', fontSize: scaleFont(22), fontWeight: '700' },
+  tip: { color: '#aaa', fontSize: scaleFont(13), marginTop: 12 },
 });

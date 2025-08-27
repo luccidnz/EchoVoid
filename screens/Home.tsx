@@ -1,9 +1,11 @@
+import React from 'react';
 
 
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { useTheme } from '../theme';
 import ParticleField from '../components/fx/ParticleField';
 import EVoidButton from '../components/ui/EVoidButton';
+import { scaleFont } from 'src/utils/scale';
 
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../src/navigation/AppNavigator';
@@ -30,7 +32,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
-  title: { fontSize: 40, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
-  subtitle: { fontSize: 16, marginBottom: 24, fontWeight: '600' },
+  title: { fontSize: scaleFont(40), fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
+  subtitle: { fontSize: scaleFont(16), marginBottom: 24, fontWeight: '600' },
   btn: { width: 220, marginVertical: 6 },
 });

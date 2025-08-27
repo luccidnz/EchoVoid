@@ -19,6 +19,15 @@ export interface Theme {
   opacity: { [k: string]: number };
 }
 
+const highContrastPalette = {
+  bg: '#000000',
+  surface: '#000000',
+  primary: '#FFFFFF',
+  accent: '#FFFF00',
+  text: '#FFFFFF',
+  danger: '#FF0000',
+};
+
 export const themes: Record<ThemeName, Theme> = {
   Void: {
     name: 'Void',
@@ -55,21 +64,39 @@ export const themes: Record<ThemeName, Theme> = {
 interface ThemeContextType {
   theme: Theme;
   setTheme: (t: ThemeName) => void;
+  highContrast: boolean;
+  setHighContrast: (v: boolean) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ theme: themes.Void, setTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({
+  theme: themes.Void,
+  setTheme: () => {},
+  highContrast: false,
+  setHighContrast: () => {},
+});
 
 export function ThemeProvider({ children }: PropsWithChildren<{}>) {
   const [themeName, setThemeName] = useState<ThemeName>('Void');
+  const [highContrast, setHighContrast] = useState(false);
   useEffect(() => {
-    AsyncStorage.getItem('theme').then((t: any) => { if (t && themes[t as ThemeName]) setThemeName(t as ThemeName); });
+    AsyncStorage.getItem('theme').then((t: any) => {
+      if (t && themes[t as ThemeName]) setThemeName(t as ThemeName);
+    });
+    AsyncStorage.getItem('highContrast').then(v => setHighContrast(v === '1'));
   }, []);
   const setTheme = (t: ThemeName) => {
     setThemeName(t);
     AsyncStorage.setItem('theme', t);
   };
+  const setHighContrastMode = (v: boolean) => {
+    setHighContrast(v);
+    AsyncStorage.setItem('highContrast', v ? '1' : '0');
+  };
+  const theme = highContrast
+    ? { ...themes[themeName], colors: highContrastPalette }
+    : themes[themeName];
   return (
-    <ThemeContext.Provider value={{ theme: themes[themeName], setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, highContrast, setHighContrast: setHighContrastMode }}>
       {children}
     </ThemeContext.Provider>
   );

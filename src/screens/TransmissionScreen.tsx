@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
+import { scaleFont } from 'src/utils/scale';
 
 // Added type annotation for navigation prop
 const TransmissionScreen = ({ navigation }: { navigation: any }) => {
@@ -20,7 +21,7 @@ const TransmissionScreen = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  h1: { color: colors.text, fontSize: 28, fontWeight: '700' },
+  h1: { color: colors.text, fontSize: scaleFont(28), fontWeight: '700' },
   p: { color: colors.subtext, marginTop: 8 },
 });
 

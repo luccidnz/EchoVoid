@@ -15,6 +15,7 @@ import AudioReactiveBars from '../components/fx/AudioReactiveBars';
 import NoiseOverlay from '../components/fx/NoiseOverlay';
 import Timer from '../components/controls/Timer';
 import EVoidButton from '../components/ui/EVoidButton';
+import { scaleFont } from 'src/utils/scale';
 
 
 function LiveITC() {
@@ -116,14 +117,14 @@ function LiveITC() {
           <EVoidButton label={playing ? "Stop" : "Play"} onPress={playing ? () => setPlaying(false) : handlePlay} />
         </View>
         {recordingUri && (
-          <Text style={{ color: theme.colors.accent, fontSize: 14, marginTop: 8 }}>
+          <Text style={{ color: theme.colors.accent, fontSize: scaleFont(14), marginTop: 8 }}>
             Recording saved: {recordingUri}
           </Text>
         )}
         <View style={{ marginTop: 12 }}>
-          <Text style={{ color: theme.colors.text, fontSize: 12 }}>Magnetometer: {mag.map(v => v.toFixed(2)).join(', ')}</Text>
-          <Text style={{ color: theme.colors.text, fontSize: 12 }}>Accelerometer: {acc.map(v => v.toFixed(2)).join(', ')}</Text>
-          {word && <Text style={{ color: theme.colors.accent, fontSize: 18, marginTop: 8 }}>ITC Word: {word}</Text>}
+          <Text style={{ color: theme.colors.text, fontSize: scaleFont(12) }}>Magnetometer: {mag.map(v => v.toFixed(2)).join(', ')}</Text>
+          <Text style={{ color: theme.colors.text, fontSize: scaleFont(12) }}>Accelerometer: {acc.map(v => v.toFixed(2)).join(', ')}</Text>
+          {word && <Text style={{ color: theme.colors.accent, fontSize: scaleFont(18), marginTop: 8 }}>ITC Word: {word}</Text>}
         </View>
       </View>
       <AudioReactiveBars />
@@ -144,7 +145,7 @@ function LiveITC() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { alignItems: 'center', marginTop: 16, marginBottom: 8 },
-  title: { fontSize: 28, fontWeight: '800', letterSpacing: 1 },
+  title: { fontSize: scaleFont(28), fontWeight: '800', letterSpacing: 1 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginVertical: 12 },
 });
 

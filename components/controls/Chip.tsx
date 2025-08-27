@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme';
+import { scaleFont } from 'src/utils/scale';
 export default function Chip({ options, value, onChange }: {
   options: string[];
   value: string;
@@ -24,5 +25,5 @@ export default function Chip({ options, value, onChange }: {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8, marginVertical: 8 },
   chip: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 16, margin: 2 },
-  text: { fontWeight: '600', fontSize: 14 },
+  text: { fontWeight: '600', fontSize: scaleFont(14) },
 });

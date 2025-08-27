@@ -8,6 +8,7 @@ import Toggle from '../components/Toggle';
 import { speakEsmera } from '../core/audio/tts';
 import { useTranscription } from '../core/audio/transcription';
 import { detectAnomalies, setSensitivity } from '../core/anomaly/detector';
+import { scaleFont } from 'src/utils/scale';
 
 export default function SessionScreen({navigation}:any){
   const { engine, session, start, stop, sync } = useSession();
@@ -26,22 +27,22 @@ export default function SessionScreen({navigation}:any){
 
   return (
   <ScrollView style={{flex:1, backgroundColor:colors.bg}} contentContainerStyle={{padding:16, gap:16}}>
-      <Text style={{color:colors.text, fontSize:18}}>Mode</Text>
+      <Text style={{color:colors.text, fontSize: scaleFont(18)}}>Mode</Text>
       <View style={{flexDirection:'row', flexWrap:'wrap'}}>
         {(['Standard','Mana','Reverse','DreamLink','Shadow','CallAndResponse'] as const).map(m =>
           <Toggle key={m} label={m} active={mode===m} onPress={()=>setMode(m)} />
         )}
       </View>
 
-  <Text style={{color:colors.text, fontSize:18}}>Sweep / Meter</Text>
+  <Text style={{color:colors.text, fontSize: scaleFont(18)}}>Sweep / Meter</Text>
       <Visualizer level={amp}/>
     <Meter level={amp} color={colors.neon}/>
 
-  <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Transcript</Text>
+  <Text style={{color:colors.text, fontSize: scaleFont(18), marginTop:8}}>Transcript</Text>
   <Text style={{color:colors.neon}}>{text || '…listening…'}</Text>
     <Text style={{color:colors.neon2, opacity:conf==null?0.5:1}}>confidence: {conf==null?'—':Math.round(conf*100)+'%'}</Text>
 
-  <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Anomalies</Text>
+  <Text style={{color:colors.text, fontSize: scaleFont(18), marginTop:8}}>Anomalies</Text>
   {hits.map((h,i)=>(<Text key={i} style={{color:colors.neon2}}>{`hit @${Math.round(h.freq)}Hz (${Math.round(h.confidence*100)}%)`}</Text>))}
 
       <View style={{flexDirection:'row', gap:12, marginTop:8}}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import EVoidButton from '../../components/ui/EVoidButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { scaleFont } from 'src/utils/scale';
 
 export default function OnboardingPrivacy({ navigation }: any) {
   return (
@@ -26,7 +27,7 @@ export default function OnboardingPrivacy({ navigation }: any) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
-  body: { color: '#ccc', fontSize: 16, textAlign: 'center', marginBottom: 32 },
+  title: { fontSize: scaleFont(28), fontWeight: '800', color: '#fff', marginBottom: 24 },
+  body: { color: '#ccc', fontSize: scaleFont(16), textAlign: 'center', marginBottom: 32 },
   btn: { minWidth: 160 },
 });
