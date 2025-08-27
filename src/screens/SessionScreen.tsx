@@ -8,15 +8,18 @@ import Toggle from '../components/Toggle';
 import { speakEsmera } from '../core/audio/tts';
 import { useTranscription } from '../core/audio/transcription';
 import { detectAnomalies, setSensitivity } from '../core/anomaly/detector';
+import { useAmbientLight } from '../hooks/useAmbientLight';
 
 export default function SessionScreen({navigation}:any){
   const { engine, session, start, stop, sync } = useSession();
   const { text, conf, listening, supported, start:startASR, stop:stopASR } = useTranscription();
+  const ambient = useAmbientLight();
   const [amp,setAmp] = useState(0);
   const [mode,setMode] = useState<'Standard'|'Mana'|'Reverse'|'DreamLink'|'Shadow'|'CallAndResponse'>('Standard');
   const [hits,setHits] = useState<any[]>([]);
 
   useEffect(()=> engine.level$(setAmp), [engine]);
+  useEffect(()=>{ engine.applyAmbient(ambient); }, [ambient, engine]);
   useEffect(()=>{ const det = setInterval(()=>{
     const arr = detectAnomalies(new Float32Array(10));
     if(arr.length) setHits(h=>[...h,...arr]);
