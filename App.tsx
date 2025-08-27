@@ -9,7 +9,7 @@ import OnboardingIntro from './screens/Onboarding/Intro';
 import OnboardingHowTo from './screens/Onboarding/HowTo';
 import OnboardingPrivacy from './screens/Onboarding/Privacy';
 import { Magnetometer, Accelerometer } from 'expo-sensors';
-import { Alert } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import TestNavigator from './src/navigation/TestNavigator';
 
 const Stack = createNativeStackNavigator();
@@ -25,10 +25,14 @@ function runSensorTestAndCalibration() {
       magSub.remove();
       accSub.remove();
       if (magData && accData) {
-        console.log('Sensor data collected successfully:', { mag: magData, acc: accData });
+        if (__DEV__) {
+          console.log('Sensor data collected successfully:', { mag: magData, acc: accData });
+        }
         resolve({ mag: magData, acc: accData });
       } else {
-        console.error('Sensor data incomplete:', { mag: magData, acc: accData });
+        if (__DEV__) {
+          console.error('Sensor data incomplete:', { mag: magData, acc: accData });
+        }
         reject(new Error('Sensor data incomplete'));
       }
     };
@@ -56,26 +60,37 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    runSensorTestAndCalibration().then((result) => {
-      // Optionally store result in context or AsyncStorage
-      console.log('Sensor calibration:', result);
-    });
     const checkOnboarded = async () => {
       const v = await AsyncStorage.getItem('onboarded');
       setShowOnboarding(v !== '1');
     };
-    checkOnboarded();
-    const interval = setInterval(checkOnboarded, 1000);
-    return () => clearInterval(interval);
+
+    const init = async () => {
+      try {
+        const result = await runSensorTestAndCalibration();
+        if (__DEV__) {
+          console.log('Sensor calibration:', result);
+        }
+      } catch (error) {
+        console.error('Sensor calibration failed', error);
+        Alert.alert(
+          'Sensor calibration failed',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+      checkOnboarded();
+    };
+
+    init();
+
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        checkOnboarded();
+      }
+    });
+
+    return () => subscription.remove();
   }, []);
-
-  // Add debugging logs to showOnboarding state transitions
-  useEffect(() => {
-    console.log('showOnboarding state changed:', showOnboarding);
-  }, [showOnboarding]);
-
-  // Add debugging logs to verify showOnboarding state
-  console.log('showOnboarding state:', showOnboarding);
 
   if (showOnboarding === null) return null;
 
