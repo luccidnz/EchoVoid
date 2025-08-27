@@ -67,6 +67,24 @@ async function update(id: string, data: any) {
   }
 }
 
+async function appendAnomaly(id: string, ms: number) {
+  try {
+    const sessions = await list();
+    const idx = sessions.findIndex((s: any) => s.id === id);
+    if (idx !== -1) {
+      const sess = sessions[idx];
+      sess.anomalies = sess.anomalies || [];
+      sess.anomalies.push(ms);
+      await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Failed to append anomaly:', error);
+    throw error;
+  }
+}
+
 async function deleteMedia(sessionId: string) {
   try {
     const mediaPath = `${MEDIA_DIR}${sessionId}/`;
@@ -98,4 +116,5 @@ export default {
   update,
   delete: _delete,
   list,
+  appendAnomaly,
 };

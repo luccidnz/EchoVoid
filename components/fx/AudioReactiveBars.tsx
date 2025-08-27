@@ -4,32 +4,26 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-na
 
 const BAR_COUNT = 16;
 
-export default function AudioReactiveBars({ rms = 0.2 }: { rms?: number }) {
-  // Animate bar heights based on rms
-  const [barHeights, setBarHeights] = React.useState<number[]>(Array(BAR_COUNT).fill(0));
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setBarHeights(generateBarHeights());
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const generateBarHeights = () => {
-    return Array.from({ length: BAR_COUNT }, () => Math.random());
-  };
+export default function AudioReactiveBars({ spectrum = [] }: { spectrum?: number[] }) {
+  // Use incoming spectrum data (0..1) to drive bar heights
+  const bars = React.useMemo(() => {
+    const copy = spectrum.slice(0, BAR_COUNT);
+    if (copy.length < BAR_COUNT) {
+      return copy.concat(Array(BAR_COUNT - copy.length).fill(0));
+    }
+    return copy;
+  }, [spectrum]);
 
   return (
     <View style={{ height: 40, width: '100%', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>
-      {barHeights.map((barRms, i) => {
-        const heightVal = useSharedValue(10 + barRms * 60);
+      {bars.map((value, i) => {
+        const heightVal = useSharedValue(10);
         React.useEffect(() => {
-          heightVal.value = withTiming(10 + barRms * 60, { duration: 120 });
-        }, [rms]);
+          heightVal.value = withTiming(10 + value * 60, { duration: 120 });
+        }, [value]);
         const style = useAnimatedStyle(() => ({
           height: heightVal.value,
-          backgroundColor: `rgba(0,224,255,${0.18 + i / BAR_COUNT * 0.5})`,
+          backgroundColor: `rgba(0,224,255,${0.18 + (i / BAR_COUNT) * 0.5})`,
           marginHorizontal: 2,
           borderRadius: 4,
           width: 8,
