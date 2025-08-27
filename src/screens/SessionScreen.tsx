@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSession } from '../context/SessionContext';
 import { colors } from '../theme/colors';
+import Screen from './_layout/Screen';
 import Meter from '../components/Meter';
 import Visualizer from '../components/Visualizer';
 import Toggle from '../components/Toggle';
@@ -25,7 +26,8 @@ export default function SessionScreen({navigation}:any){
   const onSpeak = ()=> speakEsmera(text || 'Welcome to EchoVoid.', !text);
 
   return (
-  <ScrollView style={{flex:1, backgroundColor:colors.bg}} contentContainerStyle={{padding:16, gap:16}}>
+    <Screen style={{flex:1, backgroundColor:colors.bg}}>
+      <ScrollView contentContainerStyle={{padding:16, gap:16}}>
       <Text style={{color:colors.text, fontSize:18}}>Mode</Text>
       <View style={{flexDirection:'row', flexWrap:'wrap'}}>
         {(['Standard','Mana','Reverse','DreamLink','Shadow','CallAndResponse'] as const).map(m =>
@@ -56,7 +58,8 @@ export default function SessionScreen({navigation}:any){
       <Pressable onPress={()=>navigation.navigate('Logbook')} style={btnGhost}><Text style={{color:colors.text}}>Logbook</Text></Pressable>
       <Pressable onPress={sync} style={btnGhost}><Text style={{color:colors.text}}>Sync</Text></Pressable>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </Screen>
   );
 }
 const btn = { backgroundColor:'#0e2f36', borderWidth:1, borderColor:colors.neon, paddingVertical:10, paddingHorizontal:14, borderRadius:10 };

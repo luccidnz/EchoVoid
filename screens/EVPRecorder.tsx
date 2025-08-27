@@ -4,6 +4,7 @@ import * as Recorder from '../services/audio/Recorder';
 import SessionStore from '../services/sessions/SessionStore';
 import SpectrogramPreview from '../components/evp/SpectrogramPreview';
 import { detectAnomalies } from '../src/core/anomaly/detector';
+import Screen from './_layout/Screen';
 
 export default function EVPRecorder() {
   const [recording, setRecording] = useState(false);
@@ -55,7 +56,7 @@ export default function EVPRecorder() {
   };
 
   return (
-    <View style={styles.container}>
+    <Screen style={styles.container}>
       <Text style={styles.title}>EVP Recorder</Text>
       <View style={styles.status}>
         <Text>Status: {recording ? 'Recording...' : uri ? 'Stopped' : 'Idle'}</Text>
@@ -81,7 +82,7 @@ export default function EVPRecorder() {
         {uri && <Button title="Save Session" onPress={saveSession} />}
         {uri && <Button title="Play Recording" onPress={handlePlay} />}
       </View>
-    </View>
+    </Screen>
   );
 }
 

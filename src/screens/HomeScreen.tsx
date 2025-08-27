@@ -6,6 +6,7 @@ import type { RootStackParamList } from '../navigation/AppNavigator';
 import UIButton from '../components/UIButton';
 import { colors } from '../theme/colors';
 import { hasNativeVoice, startListening } from '../voice/adapter';
+import Screen from './_layout/Screen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -29,23 +30,25 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   return (
-    <LinearGradient
-      colors={[colors.bg, '#0A0A1C', colors.card]}
-      style={styles.flex}
-    >
-      <StatusBar barStyle="light-content" />
-      <View style={styles.container}>
+    <Screen>
+      <LinearGradient
+        colors={[colors.bg, '#0A0A1C', colors.card]}
+        style={styles.flex}
+      >
+        <StatusBar barStyle="light-content" />
+        <View style={styles.container}>
         <Text style={styles.title}>Ech0Void</Text>
         <Text style={styles.subtitle}>where echos become answers</Text>
 
         <UIButton label="Begin Transmission" onPress={onBegin} style={styles.btn} testID="btn-begin" />
-        <UIButton label="Settings" onPress={() => { console.log('[Home] Settings'); console.log('[HomeScreen] Navigating to Settings'); navigation.navigate('Settings'); }} style={styles.btn} testID="btn-settings" />
-        <UIButton label="AR Mode" onPress={() => { console.log('[Home] ARMode'); console.log('[HomeScreen] Navigating to ARMode'); navigation.navigate('ARMode'); }} style={styles.btn} testID="btn-ar" />
-      </View>
+          <UIButton label="Settings" onPress={() => { console.log('[Home] Settings'); console.log('[HomeScreen] Navigating to Settings'); navigation.navigate('Settings'); }} style={styles.btn} testID="btn-settings" />
+          <UIButton label="AR Mode" onPress={() => { console.log('[Home] ARMode'); console.log('[HomeScreen] Navigating to ARMode'); navigation.navigate('ARMode'); }} style={styles.btn} testID="btn-ar" />
+        </View>
 
-      {/* decorative neon ring that never intercepts touches */}
-      <View pointerEvents="none" style={styles.ring} />
-    </LinearGradient>
+        {/* decorative neon ring that never intercepts touches */}
+        <View pointerEvents="none" style={styles.ring} />
+      </LinearGradient>
+    </Screen>
   );
 }
 

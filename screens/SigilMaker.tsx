@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import buildSigil from '../services/sigil/buildSigil';
+import Screen from './_layout/Screen';
 
 export default function SigilMaker() {
   const [phrase, setPhrase] = useState('');
@@ -12,7 +13,7 @@ export default function SigilMaker() {
   };
 
   return (
-    <View style={styles.container}>
+    <Screen style={styles.container}>
       <Text style={styles.title}>Sigil Maker</Text>
       <TextInput
         style={styles.input}
@@ -28,7 +29,7 @@ export default function SigilMaker() {
           <Path d={sigilPath} stroke="black" fill="none" />
         </Svg>
       ) : null}
-    </View>
+    </Screen>
   );
 }
 

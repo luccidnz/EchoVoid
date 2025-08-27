@@ -6,6 +6,7 @@ import { GLView } from 'expo-gl';
 import { Renderer } from 'expo-three';
 import * as THREE from 'three';
 import { colors } from '../theme/colors';
+import Screen from './_layout/Screen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -63,7 +64,7 @@ export default function ARModeScreen({ navigation }: any) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <Screen style={{ flex: 1 }}>
       {hasPermission && (
         <ExpoCamera ref={cameraRef} style={StyleSheet.absoluteFill} type={type} />
       )}
@@ -78,7 +79,7 @@ export default function ARModeScreen({ navigation }: any) {
         <Text style={styles.p}>Light: {light ? light.toFixed(2) : 'n/a'} lux</Text>
         <Text style={styles.p}>(3D compass overlays camera, reacts to sensors)</Text>
       </View>
-    </View>
+    </Screen>
   );
 }
 

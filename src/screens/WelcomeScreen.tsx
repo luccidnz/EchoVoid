@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { themeColors } from '../theme/theme';
+import Screen from './_layout/Screen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -10,11 +11,12 @@ export default function WelcomeScreen({ navigation }: any) {
   console.log('WelcomeScreen navigation prop:', navigation);
   const { theme } = useTheme();
   return (
-    <LinearGradient
-      colors={[themeColors.card, themeColors.accent2, themeColors.neon]}
-      style={styles.gradient}
-    >
-      <View style={styles.container}>
+    <Screen>
+      <LinearGradient
+        colors={[themeColors.card, themeColors.accent2, themeColors.neon]}
+        style={styles.gradient}
+      >
+        <View style={styles.container}>
   <Text style={[styles.title, { color: themeColors.neon }]}>EchØVoid</Text>
   <Text style={[styles.subtitle, { color: themeColors.text }]}>Where echoes become answers.</Text>
         <Pressable
@@ -57,8 +59,9 @@ export default function WelcomeScreen({ navigation }: any) {
         >
           <Text style={[styles.buttonText, { color: themeColors.card }]}>AR Mode</Text>
         </Pressable>
-      </View>
-    </LinearGradient>
+        </View>
+      </LinearGradient>
+    </Screen>
   );
 }
 

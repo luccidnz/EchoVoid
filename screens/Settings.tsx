@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { useTheme, themes, ThemeName } from '../theme';
 import Chip from '../components/controls/Chip';
+import Screen from './_layout/Screen';
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
+    <Screen style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
       <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
       <Text style={[styles.label, { color: theme.colors.text }]}>Theme</Text>
       <Chip
@@ -17,7 +18,7 @@ export default function Settings() {
       <Text style={[styles.label, { color: theme.colors.text }]}>Audio FX (coming soon)</Text>
       <Text style={[styles.label, { color: theme.colors.text }]}>Performance (coming soon)</Text>
       <Text style={[styles.label, { color: theme.colors.text }]}>Privacy (coming soon)</Text>
-    </View>
+    </Screen>
   );
 }
 
