@@ -15,40 +15,47 @@ import TestNavigator from './src/navigation/TestNavigator';
 const Stack = createNativeStackNavigator();
 
 // Ensure proper handling of sensor data and fallback logic
-function runSensorTestAndCalibration() {
-  return new Promise<{ mag: { x: number; y: number; z: number } | null; acc: { x: number; y: number; z: number } | null }>((resolve, reject) => {
-    let magReady = false, accReady = false;
-    let magData: { x: number; y: number; z: number } | null = null;
-    let accData: { x: number; y: number; z: number } | null = null;
+async function runSensorTestAndCalibration() {
+  const { granted } = await Accelerometer.requestPermissionsAsync();
+  if (!granted) throw new Error('Accelerometer permission not granted');
+  let magSub: any;
+  let accSub: any;
+  try {
+    return await new Promise<{ mag: { x: number; y: number; z: number } | null; acc: { x: number; y: number; z: number } | null }>((resolve, reject) => {
+      let magReady = false, accReady = false;
+      let magData: { x: number; y: number; z: number } | null = null;
+      let accData: { x: number; y: number; z: number } | null = null;
 
-    const finish = () => {
-      magSub.remove();
-      accSub.remove();
-      if (magData && accData) {
-        console.log('Sensor data collected successfully:', { mag: magData, acc: accData });
-        resolve({ mag: magData, acc: accData });
-      } else {
-        console.error('Sensor data incomplete:', { mag: magData, acc: accData });
-        reject(new Error('Sensor data incomplete'));
-      }
-    };
+      const finish = () => {
+        if (magData && accData) {
+          console.log('Sensor data collected successfully:', { mag: magData, acc: accData });
+          resolve({ mag: magData, acc: accData });
+        } else {
+          console.error('Sensor data incomplete:', { mag: magData, acc: accData });
+          reject(new Error('Sensor data incomplete'));
+        }
+      };
 
-    const magSub = Magnetometer.addListener((data) => {
-      magData = data;
-      magReady = true;
-      if (magReady && accReady) finish();
+      magSub = Magnetometer.addListener((data) => {
+        magData = data;
+        magReady = true;
+        if (magReady && accReady) finish();
+      });
+
+      accSub = Accelerometer.addListener((data) => {
+        accData = data;
+        accReady = true;
+        if (magReady && accReady) finish();
+      });
+
+      setTimeout(() => {
+        if (!magReady || !accReady) finish();
+      }, 2000);
     });
-
-    const accSub = Accelerometer.addListener((data) => {
-      accData = data;
-      accReady = true;
-      if (magReady && accReady) finish();
-    });
-
-    setTimeout(() => {
-      if (!magReady || !accReady) finish();
-    }, 2000);
-  });
+  } finally {
+    magSub && magSub.remove();
+    accSub && accSub.remove();
+  }
 }
 
 export default function App() {

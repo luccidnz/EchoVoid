@@ -36,17 +36,26 @@ export default async function getEntropy() {
       };
       await recording.prepareToRecordAsync(recordingOptions);
       await recording.startAsync();
-      const status = await recording.getStatusAsync();
-      micRMS = status.metering || 0;
-      await recording.stopAndUnloadAsync();
+      try {
+        const status = await recording.getStatusAsync();
+        micRMS = status.metering || 0;
+      } finally {
+        await recording.stopAndUnloadAsync();
+      }
     }
 
     // Get accelerometer data
-    const accelListener = Accelerometer.addListener((data) => {
-      accelData = data;
-    });
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for data
-    accelListener.remove();
+    const { granted: accelGranted } = await Accelerometer.requestPermissionsAsync();
+    if (accelGranted) {
+      const accelListener = Accelerometer.addListener((data) => {
+        accelData = data;
+      });
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for data
+      } finally {
+        accelListener.remove();
+      }
+    }
   } catch (error) {
     console.error('Failed to gather entropy sources:', error);
   }
