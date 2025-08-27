@@ -8,11 +8,8 @@ import TransmissionScreen from '../screens/TransmissionScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ARModeScreen from '../screens/ARModeScreen';
 
-import Logbook from '../../screens/Logbook';
+import LogbookScreen from '../screens/LogbookScreen';
 import SessionDetail from '../../components/logbook/SessionDetail';
-import OnboardingIntro from '../../screens/Onboarding/Intro';
-import OnboardingHowTo from '../../screens/Onboarding/HowTo';
-import OnboardingPrivacy from '../../screens/Onboarding/Privacy';
 import WelcomeScreen from '../screens/WelcomeScreen';
 
 export type RootStackParamList = {
@@ -42,7 +39,7 @@ function AppNavigator() {
         <Stack.Screen name="Transmission" component={TransmissionScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="ARMode" component={ARModeScreen} />
-        <Stack.Screen name="Logbook" component={Logbook} />
+        <Stack.Screen name="Logbook" component={LogbookScreen} />
         <Stack.Screen name="SessionDetail" component={SessionDetail} />
       </Stack.Navigator>
     </NavigationContainer>
