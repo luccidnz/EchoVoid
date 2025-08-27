@@ -8,7 +8,7 @@
     "android": "expo start --dev-client",
     "web": "expo start --web",
     "devclient": "expo start --dev-client --tunnel",
-    "test": "node --test --import tsx tests/signal.test.ts"
+    "test": "node --test --import tsx tests/*.test.ts"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
