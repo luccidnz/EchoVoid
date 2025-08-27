@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useSession } from '../context/SessionContext';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/theme';
 import Meter from '../components/Meter';
 import Visualizer from '../components/Visualizer';
 import Toggle from '../components/Toggle';
@@ -11,10 +11,16 @@ import { detectAnomalies, setSensitivity } from '../core/anomaly/detector';
 
 export default function SessionScreen({navigation}:any){
   const { engine, session, start, stop, sync } = useSession();
+  const { theme } = useTheme();
+  const { colors } = theme;
   const { text, conf, listening, supported, start:startASR, stop:stopASR } = useTranscription();
   const [amp,setAmp] = useState(0);
   const [mode,setMode] = useState<'Standard'|'Mana'|'Reverse'|'DreamLink'|'Shadow'|'CallAndResponse'>('Standard');
   const [hits,setHits] = useState<any[]>([]);
+
+  const btn = { backgroundColor:colors.card, borderWidth:1, borderColor:colors.neon, paddingVertical:10, paddingHorizontal:14, borderRadius:10 };
+  const btnt = { color:colors.neon, fontWeight:"bold" };
+  const btnGhost = { backgroundColor:colors.bg, borderWidth:1, borderColor:colors.line, paddingVertical:10, paddingHorizontal:14, borderRadius:10 };
 
   useEffect(()=> engine.level$(setAmp), [engine]);
   useEffect(()=>{ const det = setInterval(()=>{
@@ -46,19 +52,16 @@ export default function SessionScreen({navigation}:any){
 
       <View style={{flexDirection:'row', gap:12, marginTop:8}}>
         {!session
-          ? <Pressable onPress={()=>start(mode)} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Start</Text></Pressable>
-          : <Pressable onPress={()=>stop()} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Stop</Text></Pressable>}
+          ? <Pressable onPress={()=>start(mode)} style={btn}><Text style={btnt}>Start</Text></Pressable>
+          : <Pressable onPress={()=>stop()} style={btn}><Text style={btnt}>Stop</Text></Pressable>}
         {supported
           ? !listening
-            ? <Pressable onPress={startASR} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Listen</Text></Pressable>
-            : <Pressable onPress={stopASR} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Stop ASR</Text></Pressable>
-          : <Pressable onPress={onSpeak} style={btn}><Text style={{ color: colors.neon, fontWeight: "bold" }}>Speak</Text></Pressable>}
+            ? <Pressable onPress={startASR} style={btn}><Text style={btnt}>Listen</Text></Pressable>
+            : <Pressable onPress={stopASR} style={btn}><Text style={btnt}>Stop ASR</Text></Pressable>
+          : <Pressable onPress={onSpeak} style={btn}><Text style={btnt}>Speak</Text></Pressable>}
       <Pressable onPress={()=>navigation.navigate('Logbook')} style={btnGhost}><Text style={{color:colors.text}}>Logbook</Text></Pressable>
       <Pressable onPress={sync} style={btnGhost}><Text style={{color:colors.text}}>Sync</Text></Pressable>
       </View>
     </ScrollView>
   );
 }
-const btn = { backgroundColor:'#0e2f36', borderWidth:1, borderColor:colors.neon, paddingVertical:10, paddingHorizontal:14, borderRadius:10 };
-const btnt = { color:colors.neon, fontWeight:"bold" };
-const btnGhost = { backgroundColor:'#141414', borderWidth:1, borderColor:'#2a2a2a', paddingVertical:10, paddingHorizontal:14, borderRadius:10 };

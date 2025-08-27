@@ -1,48 +1,72 @@
-// Custom theme colors for app screens (includes all keys)
-export const themeColors = {
-  ...colors,
-};
-import React, { PropsWithChildren } from 'react';
+import React, { createContext, useContext, useState, PropsWithChildren } from 'react';
+import { View } from 'react-native';
 import { DefaultTheme, Theme as NavTheme } from '@react-navigation/native';
-import { colors } from './colors';
+import { colors as baseColors } from './colors';
+import { highContrastColors } from './variants/highContrast';
 
-export const navTheme: NavTheme = {
+export type ThemeVariant = 'default' | 'highContrast';
+
+export interface Theme {
+  colors: typeof baseColors;
+  navTheme: NavTheme;
+}
+
+const createNavTheme = (c: typeof baseColors): NavTheme => ({
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: colors.bg,
-    card: colors.card,
-    text: colors.text,
-    border: colors.line,
-    primary: colors.accent,
-    notification: colors.neon,
+    background: c.bg,
+    card: c.card,
+    text: c.text,
+    border: c.line,
+    primary: c.accent,
+    notification: c.neon,
   },
+});
+
+const defaultTheme: Theme = {
+  colors: baseColors,
+  navTheme: createNavTheme(baseColors),
 };
 
-import { ImageBackground, StyleSheet, View, Animated, Easing } from 'react-native';
+const hcColors = highContrastColors;
+const highContrast: Theme = {
+  colors: hcColors,
+  navTheme: createNavTheme(hcColors),
+};
+
+export const themes: Record<ThemeVariant, Theme> = {
+  default: defaultTheme,
+  highContrast,
+};
+
+// Backwards compatibility exports
+export const themeColors = themes.default.colors;
+export const navTheme = themes.default.navTheme;
+
+interface ThemeContextType {
+  variant: ThemeVariant;
+  theme: Theme;
+  setVariant: (v: ThemeVariant) => void;
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  variant: 'default',
+  theme: themes.default,
+  setVariant: () => {},
+});
 
 export function ThemeProvider({ children }: PropsWithChildren) {
+  const [variant, setVariant] = useState<ThemeVariant>('default');
+  const theme = themes[variant];
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Gradient background for astral/spiritual effect */}
-      <View style={styles.gradientBg}>
-        {children}
-      </View>
-    </View>
+    <ThemeContext.Provider value={{ variant, theme, setVariant }}>
+      <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>{children}</View>
+    </ThemeContext.Provider>
   );
 }
 
-const styles = StyleSheet.create({
-  gradientBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: -1,
-    backgroundColor: '#2C1B0F', // lighter brown for better contrast
-  },
-  bg: { flex: 1, width: '100%', height: '100%', justifyContent: 'center', backgroundColor: '#2C1B0F' },
-  overlay: { flex: 1, opacity: 0.08, justifyContent: 'center' }, // lower overlay opacity for brightness
-});
+export function useTheme() {
+  return useContext(ThemeContext);
+}
