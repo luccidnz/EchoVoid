@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
 
 type Props = {
@@ -11,14 +12,24 @@ type Props = {
   disabled?: boolean;
 };
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 export default function EVoidButton({ label, onPress, variant = 'solid', style, testID, disabled = false }: Props) {
   const { theme } = useTheme();
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
   return (
-    <Pressable
+    <AnimatedPressable
       testID={testID}
       accessibilityRole="button"
       hitSlop={12}
       onPress={disabled ? undefined : onPress}
+      onPressIn={() => (scale.value = withTiming(0.96, { duration: 100 }))}
+      onPressOut={() => (scale.value = withTiming(1, { duration: 100 }))}
+      onHoverIn={() => (scale.value = withTiming(1.04, { duration: 150 }))}
+      onHoverOut={() => (scale.value = withTiming(1, { duration: 150 }))}
       style={({ pressed }) => [
         styles.btn,
         variant === 'outline' && { backgroundColor: 'transparent', borderColor: theme.colors.accent, borderWidth: 2 },
@@ -27,12 +38,13 @@ export default function EVoidButton({ label, onPress, variant = 'solid', style, 
         pressed && !disabled && { opacity: 0.8 },
         disabled && { opacity: 0.5 },
         style,
+        animatedStyle,
       ]}
       pointerEvents={disabled ? 'none' : 'auto'}
       accessibilityState={{ disabled }}
     >
       <Text style={[styles.text, { color: theme.colors.text }]}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 const styles = StyleSheet.create({
