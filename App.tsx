@@ -3,16 +3,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider } from './src/theme/theme';
 import EsmeraProvider from './services/tts/EsmeraProvider';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import OnboardingIntro from './screens/Onboarding/Intro';
-import OnboardingHowTo from './screens/Onboarding/HowTo';
-import OnboardingPrivacy from './screens/Onboarding/Privacy';
+import AppNavigator from './src/navigation/AppNavigator';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import { Magnetometer, Accelerometer } from 'expo-sensors';
-import { Alert } from 'react-native';
-import TestNavigator from './src/navigation/TestNavigator';
-
-const Stack = createNativeStackNavigator();
 
 // Ensure proper handling of sensor data and fallback logic
 function runSensorTestAndCalibration() {
@@ -83,17 +76,16 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
         <EsmeraProvider>
-          <NavigationContainer>
-            {showOnboarding ? (
-              <Stack.Navigator initialRouteName="OnboardingIntro" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="OnboardingIntro" component={OnboardingIntro} />
-                <Stack.Screen name="OnboardingHowTo" component={OnboardingHowTo} />
-                <Stack.Screen name="OnboardingPrivacy" component={OnboardingPrivacy} />
-              </Stack.Navigator>
-            ) : (
-              <TestNavigator />
-            )}
-          </NavigationContainer>
+          {showOnboarding ? (
+            <OnboardingScreen
+              onDone={async () => {
+                await AsyncStorage.setItem('onboarded', '1');
+                setShowOnboarding(false);
+              }}
+            />
+          ) : (
+            <AppNavigator />
+          )}
         </EsmeraProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
