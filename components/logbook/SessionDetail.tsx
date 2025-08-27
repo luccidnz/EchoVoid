@@ -6,6 +6,7 @@ import { shareSessionZip } from '../../services/export/zipSession';
 
 export default function SessionDetail({ route }: any) {
   const session = route?.params?.session;
+  const created = session?.created || session?.date;
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
 
@@ -40,7 +41,7 @@ export default function SessionDetail({ route }: any) {
       <Text style={styles.label}>Type:</Text>
       <Text style={styles.value}>{session?.type || 'Session'}</Text>
       <Text style={styles.label}>Date:</Text>
-      <Text style={styles.value}>{new Date(session?.created).toLocaleString()}</Text>
+      <Text style={styles.value}>{new Date(created).toLocaleString()}</Text>
       <Text style={styles.label}>Anomalies:</Text>
       <Text style={styles.value}>{session?.anomalies?.length ?? 0}</Text>
       <EVoidButton
