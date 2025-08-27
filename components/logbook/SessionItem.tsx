@@ -5,7 +5,7 @@ export default function SessionItem({ session, onDelete, onView }: { session: an
   return (
     <View style={styles.item}>
       <Text style={styles.type}>{session.type || 'Session'}</Text>
-      <Text style={styles.date}>{new Date(session.created).toLocaleString()}</Text>
+      <Text style={styles.date}>{new Date(session.date).toLocaleString()}</Text>
       <Text style={styles.info}>Anomalies: {session.anomalies?.length ?? 0}</Text>
       <View style={styles.actions}>
         <Pressable onPress={onView} style={styles.actionButton}><Text style={styles.actionText}>View</Text></Pressable>
