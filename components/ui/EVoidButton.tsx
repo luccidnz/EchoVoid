@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme';
+import { SPACING } from '../../src/theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../src/theme/typography';
 
 type Props = {
   label: string;
@@ -36,6 +38,12 @@ export default function EVoidButton({ label, onPress, variant = 'solid', style, 
   );
 }
 const styles = StyleSheet.create({
-  btn: { paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center', marginVertical: 4 },
-  text: { fontSize: 16, fontWeight: '700', letterSpacing: 0.4 },
+  btn: {
+    paddingVertical: SPACING.sm + SPACING.xs + SPACING.xxs,
+    paddingHorizontal: SPACING.md + SPACING.xs,
+    borderRadius: SPACING.sm + SPACING.xs + SPACING.xxs,
+    alignItems: 'center',
+    marginVertical: SPACING.xs,
+  },
+  text: { fontSize: FONT_SIZES.md, fontWeight: FONT_WEIGHTS.bold, letterSpacing: 0.4 },
 });

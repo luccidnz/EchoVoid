@@ -1,5 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
+import { SPACING } from '../theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../theme/typography';
 
 type Props = {
   label: string;
@@ -32,17 +34,17 @@ export default function UIButton({ label, onPress, style, testID }: Props) {
 
 const styles = StyleSheet.create({
   btn: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 14,
+    paddingVertical: SPACING.sm + SPACING.xs + SPACING.xxs,
+    paddingHorizontal: SPACING.md + SPACING.xs,
+    borderRadius: SPACING.sm + SPACING.xs + SPACING.xxs,
     backgroundColor: '#111827',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.10)',
   },
   text: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: 0.4,
   },
 });

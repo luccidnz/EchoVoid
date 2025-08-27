@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
+import { SPACING } from '../theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../theme/typography';
 
 export default function SettingsScreen({ navigation }: { navigation: any }) {
   // Log navigation prop
@@ -17,7 +19,7 @@ export default function SettingsScreen({ navigation }: { navigation: any }) {
   );
 }
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  h1: { color: colors.text, fontSize: 28, fontWeight: '700' },
-  p: { color: colors.subtext, marginTop: 8 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.lg },
+  h1: { color: colors.text, fontSize: FONT_SIZES.xxxl, fontWeight: FONT_WEIGHTS.bold },
+  p: { color: colors.subtext, marginTop: SPACING.sm },
 });

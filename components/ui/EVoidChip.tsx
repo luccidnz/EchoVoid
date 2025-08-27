@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme';
+import { SPACING } from '../../src/theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../src/theme/typography';
 
 type Props = { label: string; selected?: boolean; style?: ViewStyle | ViewStyle[] };
 export default function EVoidChip({ label, selected, style }: Props) {
@@ -12,6 +14,11 @@ export default function EVoidChip({ label, selected, style }: Props) {
   );
 }
 const styles = StyleSheet.create({
-  chip: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 16, margin: 4 },
-  text: { fontWeight: '600', fontSize: 14 },
+  chip: {
+    paddingVertical: SPACING.sm - SPACING.xxs,
+    paddingHorizontal: SPACING.sm + SPACING.xs + SPACING.xxs,
+    borderRadius: SPACING.md,
+    margin: SPACING.xs,
+  },
+  text: { fontWeight: FONT_WEIGHTS.semibold, fontSize: FONT_SIZES.sm },
 });

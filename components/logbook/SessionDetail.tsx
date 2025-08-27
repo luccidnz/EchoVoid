@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Audio } from 'expo-av';
 import EVoidButton from '../ui/EVoidButton';
 import { shareSessionZip } from '../../services/export/zipSession';
+import { SPACING } from '../../src/theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../src/theme/typography';
 
 export default function SessionDetail({ route }: any) {
   const session = route?.params?.session;
@@ -46,7 +48,7 @@ export default function SessionDetail({ route }: any) {
       <EVoidButton
         label={playing ? 'Stop Playback' : 'Play Recording'}
         onPress={handlePlay}
-        style={{ marginVertical: 16, minWidth: 140 }}
+        style={{ marginVertical: SPACING.md, minWidth: 140 }}
       />
       <Text style={styles.label}>Anomaly Timestamps:</Text>
       {session?.anomalies?.length ? (
@@ -56,13 +58,13 @@ export default function SessionDetail({ route }: any) {
       ) : (
         <Text style={styles.value}>None</Text>
       )}
-  <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: 24 }} />
+  <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: SPACING.lg }} />
     </ScrollView>
   );
 }
 const styles = StyleSheet.create({
-  detail: { flex: 1, padding: 20, backgroundColor: '#111' },
-  title: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 16 },
-  label: { color: '#aaa', fontWeight: '600', marginTop: 12 },
-  value: { color: '#fff', fontSize: 15, marginTop: 2 },
+  detail: { flex: 1, padding: SPACING.md + SPACING.xs, backgroundColor: '#111' },
+  title: { fontSize: FONT_SIZES.xxl, fontWeight: FONT_WEIGHTS.extrabold, color: '#fff', marginBottom: SPACING.md },
+  label: { color: '#aaa', fontWeight: FONT_WEIGHTS.semibold, marginTop: SPACING.sm + SPACING.xs },
+  value: { color: '#fff', fontSize: 15, marginTop: SPACING.xxs },
 });

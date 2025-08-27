@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import EVoidButton from '../../components/ui/EVoidButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SPACING } from '../../src/theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../src/theme/typography';
 
 export default function OnboardingPrivacy({ navigation }: any) {
   return (
@@ -19,14 +21,14 @@ export default function OnboardingPrivacy({ navigation }: any) {
       <EVoidButton label="Skip Onboarding" onPress={async () => {
         await AsyncStorage.setItem('onboarded', '1');
         navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
-      }} style={[styles.btn, { marginTop: 16, backgroundColor: '#333' }]} />
+      }} style={[styles.btn, { marginTop: SPACING.md, backgroundColor: '#333' }]} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginBottom: 24 },
-  body: { color: '#ccc', fontSize: 16, textAlign: 'center', marginBottom: 32 },
+  flex: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xl, backgroundColor: '#111' },
+  title: { fontSize: FONT_SIZES.xxxl, fontWeight: FONT_WEIGHTS.extrabold, color: '#fff', marginBottom: SPACING.lg },
+  body: { color: '#ccc', fontSize: FONT_SIZES.md, textAlign: 'center', marginBottom: SPACING.xl },
   btn: { minWidth: 160 },
 });

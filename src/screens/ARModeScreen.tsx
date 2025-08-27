@@ -6,6 +6,8 @@ import { GLView } from 'expo-gl';
 import { Renderer } from 'expo-three';
 import * as THREE from 'three';
 import { colors } from '../theme/colors';
+import { SPACING } from '../theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../theme/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -83,7 +85,7 @@ export default function ARModeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, padding: 24, alignItems: 'center' },
-  h1: { color: colors.text, fontSize: 28, fontWeight: '700', marginTop: 32 },
-  p: { color: colors.subtext, marginTop: 8 },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, padding: SPACING.lg, alignItems: 'center' },
+  h1: { color: colors.text, fontSize: FONT_SIZES.xxxl, fontWeight: FONT_WEIGHTS.bold, marginTop: SPACING.xl },
+  p: { color: colors.subtext, marginTop: SPACING.sm },
 });
