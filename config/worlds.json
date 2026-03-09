@@ -1,0 +1,34 @@
+{
+  "worlds": [
+    {
+      "id": "w1_neon_kennel_ruins",
+      "enemyRoster": ["t1_tracker", "t1_tracker"],
+      "introducedHazards": [],
+      "relicCount": 1
+    },
+    {
+      "id": "w2_sludge_metro",
+      "enemyRoster": ["t1_tracker", "t1_tracker", "t2_flanker"],
+      "introducedHazards": ["slime_tile", "carrot_missile_turret"],
+      "relicCount": 1
+    },
+    {
+      "id": "w3_rune_transit",
+      "enemyRoster": ["t1_tracker", "t1_tracker", "t2_flanker", "t2_flanker", "t3_ravager"],
+      "introducedHazards": ["portal_pair"],
+      "relicCount": 1
+    },
+    {
+      "id": "w4_vault_of_masks",
+      "enemyRoster": ["t1_tracker", "t2_flanker", "t2_flanker", "t3_ravager", "t3_ravager", "t4_warden"],
+      "introducedHazards": ["trap_panel"],
+      "relicCount": 1
+    },
+    {
+      "id": "w5_storm_core",
+      "enemyRoster": ["t2_flanker", "t2_flanker", "t3_ravager", "t3_ravager", "t4_warden"],
+      "introducedHazards": ["slime_tile", "carrot_missile_turret", "portal_pair", "trap_panel"],
+      "relicCount": 1
+    }
+  ]
+}

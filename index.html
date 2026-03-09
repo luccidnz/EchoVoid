@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VOLT-MAN</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="brand-bar">
+        <img src="icon.png" alt="Volt-Man emblem" class="emblem" />
+        <div>
+          <h1>VOLT-MAN</h1>
+          <p class="tag">Run the mazes. Bend the storm.</p>
+        </div>
+      </header>
+
+      <section id="menu" class="panel">
+        <h2>Game Modes</h2>
+        <div class="menu-grid">
+          <button data-mode="story">Start Story / Arcade</button>
+          <button data-mode="quick">Classic Quick Play</button>
+          <button data-mode="endless">Endless Mode</button>
+          <button data-mode="challenge">Challenge Mode</button>
+          <button id="show-how">How to Play</button>
+          <button id="show-intro">Play Comic Intro</button>
+        </div>
+      </section>
+
+      <section class="hud panel">
+        <div><strong>Score</strong> <span id="score">0</span></div>
+        <div><strong>Lives</strong> <span id="lives">3</span></div>
+        <div><strong>World</strong> <span id="world">1</span></div>
+        <div><strong>Combo</strong> <span id="combo">x1.0</span></div>
+        <div><strong>Relics</strong> <span id="relics">0</span></div>
+        <div><strong>Charge</strong> <span id="charge">0%</span></div>
+        <div class="meter"><div id="charge-bar"></div></div>
+      </section>
+
+      <section class="canvas-wrap panel">
+        <canvas id="game" width="840" height="600"></canvas>
+        <div id="status"></div>
+      </section>
+
+      <section id="howto" class="panel hidden">
+        <h3>How to Play</h3>
+        <ul>
+          <li>Move with Arrow Keys / WASD.</li>
+          <li>Collect coins and bonus drops, avoid enemies and hazards.</li>
+          <li>Press <kbd>Space</kbd> to trigger Overcharge when Charge is 100%.</li>
+          <li>Stopwatch slows enemies, Glove enables pulse punch, Bone grants armor, Volt-Carrot boosts speed + charge.</li>
+          <li>Portals warp you. Slime slows you. Trap tiles pulse lethal. Carrot missiles fly in lanes.</li>
+        </ul>
+      </section>
+    </div>
+
+    <div id="intro" class="overlay hidden">
+      <div class="comic" id="comic-panel"></div>
+      <button id="skip-intro">Skip</button>
+    </div>
+
+    <script src="game.js" type="module"></script>
+  </body>
+</html>
