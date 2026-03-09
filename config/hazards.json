@@ -1,0 +1,27 @@
+{
+  "hazards": [
+    {
+      "id": "slime_tile",
+      "movementMultiplier": 0.72,
+      "telegraph": "ooze_pulse"
+    },
+    {
+      "id": "carrot_missile_turret",
+      "cycleSec": 2.8,
+      "preFireTelegraphSec": 0.6,
+      "projectileSpeed": 9.0
+    },
+    {
+      "id": "trap_panel",
+      "activeSec": 1.4,
+      "inactiveSec": 2.1,
+      "preActiveTelegraphSec": 0.5
+    },
+    {
+      "id": "portal_pair",
+      "cooldownSec": 0.4,
+      "oneWay": false,
+      "allowsSecretRouting": true
+    }
+  ]
+}

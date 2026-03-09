@@ -1,0 +1,24 @@
+{
+  "base": {
+    "coin": 10,
+    "bone": 80,
+    "volt_carrot": 120,
+    "glove": 150,
+    "stopwatch": 150,
+    "enemy_t1": 200,
+    "enemy_t2": 350,
+    "enemy_t3": 600,
+    "enemy_t4": 1200,
+    "relic": 2500,
+    "collar": 1400,
+    "mask": 2000
+  },
+  "modifiers": {
+    "comboStep": 0.1,
+    "comboCap": 3.0,
+    "noHitBonusPct": 0.25,
+    "fullCollectionBonusPct": 0.15,
+    "speedClearPerSecond": 20,
+    "hazardCycleSurvivalBonus": 300
+  }
+}

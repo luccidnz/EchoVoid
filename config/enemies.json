@@ -1,0 +1,36 @@
+{
+  "tiers": [
+    {
+      "id": "t1_tracker",
+      "label": "Tracker",
+      "baseSpeed": 4.8,
+      "ai": "patrol_then_chase",
+      "overchargeInteraction": "defeatable",
+      "scoreValue": 200
+    },
+    {
+      "id": "t2_flanker",
+      "label": "Flanker",
+      "baseSpeed": 5.0,
+      "ai": "predictive_intercept_2_nodes",
+      "overchargeInteraction": "defeatable",
+      "scoreValue": 350
+    },
+    {
+      "id": "t3_ravager",
+      "label": "Ravager",
+      "baseSpeed": 5.6,
+      "ai": "aggro_spike_on_combo",
+      "overchargeInteraction": "defeatable",
+      "scoreValue": 600
+    },
+    {
+      "id": "t4_warden",
+      "label": "Warden",
+      "baseSpeed": 5.4,
+      "ai": "phase_dash_guardian",
+      "overchargeInteraction": "requires_2_hits_or_glove",
+      "scoreValue": 1200
+    }
+  ]
+}

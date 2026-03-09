@@ -1,0 +1,24 @@
+{
+  "modeUnlocks": [
+    {
+      "mode": "story_arcade",
+      "requirement": "default"
+    },
+    {
+      "mode": "classic_quick_play",
+      "requirement": "default"
+    },
+    {
+      "mode": "endless",
+      "requirement": "clear_world_2"
+    },
+    {
+      "mode": "challenge",
+      "requirement": "clear_world_3"
+    },
+    {
+      "mode": "relic_hunt",
+      "requirement": "future_release_flag"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "powerUps": [
+    {
+      "id": "volt_carrot",
+      "rarity": "uncommon",
+      "effects": {
+        "speedMultiplier": 1.3,
+        "durationSec": 5.0,
+        "chargeGain": 35,
+        "pickupMagnetRadius": 1
+      }
+    },
+    {
+      "id": "bone",
+      "rarity": "common",
+      "effects": {
+        "armorPipGain": 1,
+        "maxArmorPips": 2
+      }
+    },
+    {
+      "id": "glove",
+      "rarity": "rare",
+      "effects": {
+        "shockPunchEnabled": true,
+        "durationSec": 7.0,
+        "cooldownSec": 1.2,
+        "breakSoftBarriers": true
+      }
+    },
+    {
+      "id": "stopwatch",
+      "rarity": "rare",
+      "effects": {
+        "enemySpeedMultiplier": 0.65,
+        "durationSec": 4.5,
+        "pauseHazardTimers": true,
+        "comboWindowBonusSec": 0.8
+      }
+    }
+  ],
+  "bonusItems": [
+    {
+      "id": "coin",
+      "rarity": "common",
+      "score": 10,
+      "purpose": "base_score"
+    },
+    {
+      "id": "relic",
+      "rarity": "rare",
+      "score": 2500,
+      "purpose": "lore_unlock"
+    },
+    {
+      "id": "collar",
+      "rarity": "very_rare",
+      "score": 1400,
+      "purpose": "cosmetic_currency"
+    },
+    {
+      "id": "mask",
+      "rarity": "very_rare",
+      "score": 2000,
+      "purpose": "challenge_unlock"
+    }
+  ]
+}

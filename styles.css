@@ -1,0 +1,114 @@
+:root {
+  --volt-cyan-100: #d9fbff;
+  --volt-cyan-500: #4fd5ff;
+  --volt-cyan-700: #1da7e8;
+  --void-navy-900: #031023;
+  --void-black-1000: #000;
+  --danger: #ff4c7a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, Segoe UI, system-ui, sans-serif;
+  color: var(--volt-cyan-100);
+  background: radial-gradient(circle at 20% 20%, #072241 0%, var(--void-black-1000) 60%);
+  min-height: 100vh;
+}
+#app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.brand-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(90deg, #04203f, #010913);
+  border: 1px solid #125b87;
+  border-radius: 12px;
+  padding: 8px 14px;
+}
+.emblem { width: 64px; height: 64px; border-radius: 14px; }
+h1 { margin: 0; letter-spacing: 2px; }
+.tag { margin: 0; color: #8eeeff; }
+.panel {
+  margin-top: 12px;
+  background: rgba(3, 16, 35, 0.85);
+  border: 1px solid #10547b;
+  border-radius: 12px;
+  padding: 12px;
+  backdrop-filter: blur(1px);
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+button {
+  background: #0b2b4a;
+  color: var(--volt-cyan-100);
+  border: 1px solid #2097cb;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+button:hover { filter: brightness(1.25); }
+.hud {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+.meter {
+  grid-column: span 6;
+  height: 10px;
+  background: #0b2133;
+  border-radius: 8px;
+  overflow: hidden;
+}
+#charge-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #13a3e4, #8eedff);
+}
+.canvas-wrap { position: relative; }
+canvas {
+  width: 100%;
+  image-rendering: pixelated;
+  border: 1px solid #1d8fbd;
+  border-radius: 8px;
+  background: #020814;
+}
+#status {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  font-size: 18px;
+  font-weight: 800;
+  text-shadow: 0 0 10px #4fd5ff;
+}
+.hidden { display: none; }
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  display: grid;
+  place-items: center;
+  z-index: 5;
+}
+.comic {
+  width: min(90vw, 820px);
+  height: min(80vh, 520px);
+  border: 2px solid #4fd5ff;
+  border-radius: 12px;
+  padding: 20px;
+  background-image: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)), url('splash.png');
+  background-size: cover;
+  background-position: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: end;
+}
+kbd { background: #173a54; padding: 2px 7px; border-radius: 5px; }
