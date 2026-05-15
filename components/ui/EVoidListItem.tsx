@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme';
+import { SPACING } from '../../src/theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../src/theme/typography';
 
 type Props = { title: string; subtitle?: string; right?: React.ReactNode; style?: ViewStyle | ViewStyle[] };
 export default function EVoidListItem({ title, subtitle, right, style }: Props) {
@@ -16,7 +18,7 @@ export default function EVoidListItem({ title, subtitle, right, style }: Props) 
   );
 }
 const styles = StyleSheet.create({
-  item: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginVertical: 4 },
-  title: { fontWeight: '700', fontSize: 16 },
-  subtitle: { fontSize: 13, marginTop: 2 },
+  item: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md, borderRadius: SPACING.sm + SPACING.xs, marginVertical: SPACING.xs },
+  title: { fontWeight: FONT_WEIGHTS.bold, fontSize: FONT_SIZES.md },
+  subtitle: { fontSize: 13, marginTop: SPACING.xxs },
 });

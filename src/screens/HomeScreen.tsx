@@ -6,6 +6,8 @@ import type { RootStackParamList } from '../navigation/AppNavigator';
 import UIButton from '../components/UIButton';
 import { colors } from '../theme/colors';
 import { hasNativeVoice, startListening } from '../voice/adapter';
+import { SPACING } from '../theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../theme/typography';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -53,16 +55,22 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: {
     flex: 1,
-    padding: 24,
+    padding: SPACING.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: SPACING.sm + SPACING.xs,
   },
   title: {
-    color: colors.text, fontSize: 44, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase',
+    color: colors.text,
+    fontSize: FONT_SIZES.display + SPACING.xs,
+    fontWeight: FONT_WEIGHTS.black,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   subtitle: {
-    color: colors.subtext, marginTop: 6, marginBottom: 18,
+    color: colors.subtext,
+    marginTop: SPACING.sm - SPACING.xxs,
+    marginBottom: SPACING.md + SPACING.xxs,
   },
   btn: {
     width: '90%',
@@ -80,6 +88,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0,243,255,0.25)',
     shadowColor: colors.neon,
     shadowOpacity: 0.4,
-    shadowRadius: 24,
+    shadowRadius: SPACING.lg,
   },
 });

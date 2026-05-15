@@ -3,6 +3,8 @@ import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { themeColors } from '../theme/theme';
+import { SPACING } from '../theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../theme/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -68,29 +70,29 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: SPACING.xl,
   },
   title: {
-    fontSize: 38,
-    fontWeight: '900',
+    fontSize: FONT_SIZES.display - SPACING.xxs,
+    fontWeight: FONT_WEIGHTS.black,
     letterSpacing: 2,
     textShadowColor: '#000a',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 12,
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: '500',
-    marginTop: 10,
-    marginBottom: 32,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.medium,
+    marginTop: SPACING.sm + SPACING.xxs,
+    marginBottom: SPACING.xl,
     opacity: 0.85,
     textAlign: 'center',
   },
   button: {
-    marginTop: 18,
-    paddingVertical: 14,
-    paddingHorizontal: 36,
-    borderRadius: 16,
+    marginTop: SPACING.md + SPACING.xxs,
+    paddingVertical: SPACING.sm + SPACING.xs + SPACING.xxs,
+    paddingHorizontal: SPACING.lg + SPACING.sm + SPACING.xs,
+    borderRadius: SPACING.md,
     borderWidth: 2,
     minWidth: 180,
     alignItems: 'center',
@@ -100,8 +102,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.bold,
     letterSpacing: 1,
   },
 });

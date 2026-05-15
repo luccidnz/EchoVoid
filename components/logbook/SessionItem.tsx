@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { SPACING } from '../../src/theme/spacing';
+import { FONT_SIZES, FONT_WEIGHTS } from '../../src/theme/typography';
 // TODO: Show session summary, type, date, and quick actions
 export default function SessionItem({ session, onDelete, onView }: { session: any; onDelete: () => void; onView: () => void }) {
   return (
@@ -15,11 +17,11 @@ export default function SessionItem({ session, onDelete, onView }: { session: an
   );
 }
 const styles = StyleSheet.create({
-  item: { padding: 16, borderRadius: 12, backgroundColor: '#222', marginVertical: 6 },
-  type: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  date: { color: '#aaa', fontSize: 13, marginTop: 2 },
-  info: { color: '#8ff', fontSize: 13, marginTop: 4 },
-  actions: { flexDirection: 'row', marginTop: 8 },
-  actionButton: { marginRight: 12, padding: 8, backgroundColor: '#444', borderRadius: 8 },
+  item: { padding: SPACING.md, borderRadius: SPACING.sm + SPACING.xs, backgroundColor: '#222', marginVertical: SPACING.sm - SPACING.xxs },
+  type: { color: '#fff', fontWeight: FONT_WEIGHTS.bold, fontSize: FONT_SIZES.md },
+  date: { color: '#aaa', fontSize: 13, marginTop: SPACING.xxs },
+  info: { color: '#8ff', fontSize: 13, marginTop: SPACING.xs },
+  actions: { flexDirection: 'row', marginTop: SPACING.sm },
+  actionButton: { marginRight: SPACING.sm + SPACING.xs, padding: SPACING.sm, backgroundColor: '#444', borderRadius: SPACING.sm },
   actionText: { color: '#fff', fontSize: 13 },
 });
