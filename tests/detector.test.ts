@@ -10,8 +10,10 @@ describe('Anomaly Detector', () => {
 
   it('should return an empty array for no anomalies', () => {
     const sample = new Float32Array(10).fill(0);
+    const randSpy = jest.spyOn(Math, 'random').mockReturnValue(0.5);
     const result = detectAnomalies(sample);
     expect(result).toEqual([]);
+    randSpy.mockRestore();
   });
 
   it('should detect anomalies with confidence above threshold', () => {

@@ -1,3 +1,7 @@
+jest.mock('expo-sensors', () => ({
+  Magnetometer: { addListener: jest.fn() },
+  Accelerometer: { addListener: jest.fn() },
+}));
 import { Magnetometer, Accelerometer } from 'expo-sensors';
 
 describe('Sensor Integration', () => {

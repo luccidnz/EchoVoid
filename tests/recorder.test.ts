@@ -1,3 +1,17 @@
+jest.mock('expo-av', () => ({
+  Audio: {
+    requestPermissionsAsync: jest.fn(),
+    setAudioModeAsync: jest.fn(),
+    Recording: class {
+      async prepareToRecordAsync() {}
+      async startAsync() {}
+      async stopAndUnloadAsync() {}
+      getURI() { return 'uri'; }
+    },
+  },
+}));
+jest.mock('expo-av/build/Audio/RecordingConstants', () => ({ RecordingOptionsPresets: { HIGH_QUALITY: {} } }));
+
 import Recorder from '../services/audio/Recorder';
 
 describe('Recorder', () => {
