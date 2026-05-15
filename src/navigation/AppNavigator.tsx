@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { navTheme } from '../theme/theme';
+import { useTheme } from '../theme/theme';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/HomeScreen';
@@ -30,10 +30,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function AppNavigator() {
   // Log navigation container state
   console.log('[AppNavigator] Navigation state:', Stack.Navigator);
+  const { theme } = useTheme();
 
   return (
     <NavigationContainer
-      theme={navTheme}
+      theme={theme.navTheme}
       onStateChange={(state) => console.log('[AppNavigator] Navigation state changed:', state)}
     >
       <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>

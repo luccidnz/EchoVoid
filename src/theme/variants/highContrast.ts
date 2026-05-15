@@ -1,7 +1,19 @@
 import { colors } from '../colors';
-export const HIGH_CONTRAST = {
-  background: colors.bg,
+
+// Full color map for high contrast variant
+export const highContrastColors = {
+  ...colors,
+  bg: '#000000',
+  card: '#000000',
   text: '#FFFFFF',
-  primary: '#00FFFF',
-  accent: '#FF00FF'
+  subtext: '#FFFFFF',
+  neon: '#00FFFF',
+  neon2: '#FF00FF',
+  accent: '#FF00FF',
+  accent2: '#00FFFF',
+  overlay: 'rgba(255,255,255,0.1)',
+  danger: '#FF5555',
+  line: '#FFFFFF',
 };
+
+export const HIGH_CONTRAST = highContrastColors;
