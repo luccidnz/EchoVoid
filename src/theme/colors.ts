@@ -14,6 +14,8 @@ export const colors = {
   accent: '#8C52FF',
   // ethereal teal
   accent2: '#00FFD0',
+  // luminous tohunga turquoise
+  tohunga: '#00F6FF',
   // subtle violet overlay
   overlay: 'rgba(140,82,255,0.08)',
   // deep red
