@@ -85,7 +85,10 @@ export default function App() {
         <EsmeraProvider>
           <NavigationContainer>
             {showOnboarding ? (
-              <Stack.Navigator initialRouteName="OnboardingIntro" screenOptions={{ headerShown: false }}>
+              <Stack.Navigator
+                initialRouteName="OnboardingIntro"
+                screenOptions={{ headerShown: false, animation: 'fade' }}
+              >
                 <Stack.Screen name="OnboardingIntro" component={OnboardingIntro} />
                 <Stack.Screen name="OnboardingHowTo" component={OnboardingHowTo} />
                 <Stack.Screen name="OnboardingPrivacy" component={OnboardingPrivacy} />
