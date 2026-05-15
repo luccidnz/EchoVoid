@@ -20,7 +20,14 @@ export default function Logbook({ navigation }: any) {
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => navigation?.navigate?.('SessionDetail', { session: item })}>
-            <SessionItem session={item} />
+            <SessionItem
+              session={item}
+              onView={() => navigation?.navigate?.('SessionDetail', { session: item })}
+              onDelete={async () => {
+                await SessionStore.delete(item.id);
+                setSessions(prev => prev.filter(s => s.id !== item.id));
+              }}
+            />
           </TouchableOpacity>
         )}
         contentContainerStyle={{ padding: 16 }}
