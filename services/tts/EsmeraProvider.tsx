@@ -1,10 +1,19 @@
 import * as Speech from 'expo-speech';
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 
 type Voice = { identifier: string; name: string; language: string };
 
 export interface EsmeraTTS {
-  speak: (text: string, opts?: { pitch?: number; rate?: number; voiceId?: string; volume?: number }) => void;
+  speak: (
+    text: string,
+    opts?: { pitch?: number; rate?: number; voiceId?: string; volume?: number }
+  ) => void;
   availableVoices: Voice[];
   isLimited: boolean;
 }
@@ -19,7 +28,7 @@ export function useEsmera() {
   return useContext(EsmeraContext);
 }
 
-const EsmeraProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function EsmeraProvider({ children }: { children: ReactNode }): React.ReactElement {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [isLimited, setIsLimited] = useState(true);
 
@@ -56,6 +65,4 @@ const EsmeraProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =
       {children}
     </EsmeraContext.Provider>
   );
-};
-
-export default EsmeraProvider;
+}
