@@ -42,7 +42,7 @@ export default function EVPRecorder() {
       uri,
       markers,
       anomalies,
-      date: new Date().toISOString(),
+      created: new Date().toISOString(),
     };
     await SessionStore.create(session);
     Alert.alert('Session Saved', 'Your EVP session has been saved to the logbook.');

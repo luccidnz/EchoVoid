@@ -34,7 +34,14 @@ async function create(session: any) {
 async function list() {
   try {
     const raw = await AsyncStorage.getItem(SESSIONS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const sessions = raw ? JSON.parse(raw) : [];
+    return sessions.map((s: any) => {
+      if (s.date && !s.created) {
+        s.created = s.date;
+        delete s.date;
+      }
+      return s;
+    });
   } catch (error) {
     console.error('Failed to list sessions:', error);
     return [];
