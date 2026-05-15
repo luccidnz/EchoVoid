@@ -8,6 +8,7 @@ import Toggle from '../components/Toggle';
 import { speakEsmera } from '../core/audio/tts';
 import { useTranscription } from '../core/audio/transcription';
 import { detectAnomalies, setSensitivity } from '../core/anomaly/detector';
+import { generatePromptSuggestions } from '../services/promptGenerator';
 
 export default function SessionScreen({navigation}:any){
   const { engine, session, start, stop, sync } = useSession();
@@ -15,12 +16,21 @@ export default function SessionScreen({navigation}:any){
   const [amp,setAmp] = useState(0);
   const [mode,setMode] = useState<'Standard'|'Mana'|'Reverse'|'DreamLink'|'Shadow'|'CallAndResponse'>('Standard');
   const [hits,setHits] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   useEffect(()=> engine.level$(setAmp), [engine]);
   useEffect(()=>{ const det = setInterval(()=>{
     const arr = detectAnomalies(new Float32Array(10));
     if(arr.length) setHits(h=>[...h,...arr]);
   },1000); return ()=>clearInterval(det); },[]);
+
+  useEffect(()=>{
+    if(text){
+      generatePromptSuggestions(text).then(setSuggestions).catch(()=>setSuggestions([]));
+    } else {
+      setSuggestions([]);
+    }
+  },[text]);
 
   const onSpeak = ()=> speakEsmera(text || 'Welcome to EchoVoid.', !text);
 
@@ -40,6 +50,15 @@ export default function SessionScreen({navigation}:any){
   <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Transcript</Text>
   <Text style={{color:colors.neon}}>{text || '…listening…'}</Text>
     <Text style={{color:colors.neon2, opacity:conf==null?0.5:1}}>confidence: {conf==null?'—':Math.round(conf*100)+'%'}</Text>
+  {suggestions.length>0 && (
+    <View style={{marginTop:8}}>
+      {suggestions.map((s,i)=>(
+        <Pressable key={i} onPress={()=>speakEsmera(s)}>
+          <Text style={{color:colors.neon2}}>{s}</Text>
+        </Pressable>
+      ))}
+    </View>
+  )}
 
   <Text style={{color:colors.text, fontSize:18, marginTop:8}}>Anomalies</Text>
   {hits.map((h,i)=>(<Text key={i} style={{color:colors.neon2}}>{`hit @${Math.round(h.freq)}Hz (${Math.round(h.confidence*100)}%)`}</Text>))}
