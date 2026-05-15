@@ -1,7 +1,8 @@
-import { colors } from '../colors';
 export const HIGH_CONTRAST = {
-  background: colors.bg,
+  bg: '#000000',
+  surface: '#000000',
   text: '#FFFFFF',
   primary: '#00FFFF',
-  accent: '#FF00FF'
+  accent: '#FF00FF',
+  danger: '#FF0000',
 };
