@@ -4,12 +4,35 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 
+export interface Session {
+  id: string;
+  type: string;
+  created: string;
+  anomalies: number[];
+  media?: string[];
+  uri?: string;
+}
+
+function isSession(obj: unknown): obj is Session {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as any).id === 'string' &&
+    typeof (obj as any).type === 'string' &&
+    typeof (obj as any).created === 'string' &&
+    Array.isArray((obj as any).anomalies) &&
+    ( (obj as any).media === undefined || Array.isArray((obj as any).media) ) &&
+    ( (obj as any).uri === undefined || typeof (obj as any).uri === 'string' )
+  );
+}
+
 const SESSIONS_KEY = 'sessions';
 const MEDIA_DIR = `${FileSystem.documentDirectory}media/`;
 
 // Add error handling for session operations
-async function create(session: any) {
+async function create(session: Session) {
   try {
+    if (!isSession(session)) throw new Error('Invalid session');
     const sessions = await list();
     sessions.push(session);
     await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
@@ -31,32 +54,36 @@ async function create(session: any) {
   }
 }
 
-async function list() {
+async function list(): Promise<Session[]> {
   try {
     const raw = await AsyncStorage.getItem(SESSIONS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(isSession) : [];
   } catch (error) {
     console.error('Failed to list sessions:', error);
     return [];
   }
 }
 
-async function read(id: string) {
+async function read(id: string): Promise<Session | null> {
   try {
     const sessions = await list();
-    return sessions.find((s: any) => s.id === id) || null;
+    return sessions.find((s: Session) => s.id === id) || null;
   } catch (error) {
     console.error('Failed to read session:', error);
     return null;
   }
 }
 
-async function update(id: string, data: any) {
+async function update(id: string, data: Partial<Session>) {
   try {
     const sessions = await list();
-    const idx = sessions.findIndex((s: any) => s.id === id);
+    const idx = sessions.findIndex((s: Session) => s.id === id);
     if (idx !== -1) {
-      sessions[idx] = { ...sessions[idx], ...data };
+      const updated = { ...sessions[idx], ...data };
+      if (!isSession(updated)) throw new Error('Invalid session');
+      sessions[idx] = updated;
       await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
       return true;
     }
@@ -82,7 +109,7 @@ async function deleteMedia(sessionId: string) {
 async function _delete(id: string) {
   try {
     const sessions = await list();
-    const filtered = sessions.filter((s: any) => s.id !== id);
+    const filtered = sessions.filter((s: Session) => s.id !== id);
     await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(filtered));
     await deleteMedia(id);
     return true;

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import SessionStore from '../services/sessions/SessionStore';
+import SessionStore, { Session } from '../services/sessions/SessionStore';
 import SessionItem from '../components/logbook/SessionItem';
 
 export default function Logbook({ navigation }: any) {
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   useEffect(() => {
     (async () => {
       const list = await SessionStore.list();
