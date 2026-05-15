@@ -3,7 +3,7 @@
 ## Install Native Dependencies
 
 ```
-npx expo install expo-speech expo-av expo-sensors expo-haptics expo-file-system expo-sharing react-native-svg react-native-gesture-handler react-native-reanimated react-native-mmkv expo-blur expo-application react-native-view-shot
+npx expo install expo-speech expo-av expo-sensors expo-haptics expo-file-system expo-sharing react-native-svg react-native-gesture-handler react-native-reanimated expo-blur expo-application react-native-view-shot
 ```
 
 ## Generate Dev Client
