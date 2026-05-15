@@ -1,25 +1,26 @@
+import { test } from 'node:test';
+import assert from 'node:assert';
 import { detectAnomalies } from '../src/core/anomaly/detector';
 
-describe('Anomaly Detector', () => {
-  it('should return anomalies for a sample input', () => {
-    const sample = new Float32Array([0.1, 0.2, 0.9, 0.3, 0.8]);
-    const result = detectAnomalies(sample);
-    expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBeGreaterThanOrEqual(0);
-  });
+test('returns empty array when random >= 0.1', () => {
+  const orig = Math.random;
+  Math.random = () => 0.5; // no anomaly
+  const res = detectAnomalies(new Float32Array(10).fill(0));
+  assert.deepStrictEqual(res, []);
+  Math.random = orig;
+});
 
-  it('should return an empty array for no anomalies', () => {
-    const sample = new Float32Array(10).fill(0);
-    const result = detectAnomalies(sample);
-    expect(result).toEqual([]);
-  });
-
-  it('should detect anomalies with confidence above threshold', () => {
-    const sample = new Float32Array([0.5, 0.6, 0.7, 0.8, 0.9]);
-    const result = detectAnomalies(sample);
-    result.forEach((anomaly) => {
-      expect(anomaly.confidence).toBeGreaterThanOrEqual(0);
-      expect(anomaly.freq).toBeGreaterThan(0);
-    });
-  });
+test('returns anomaly with deterministic random values', () => {
+  const orig = Math.random;
+  const seq = [0.05, 0.2, 0.3, 0.7];
+  let i = 0;
+  Math.random = () => seq[i++];
+  const res = detectAnomalies(new Float32Array(5).fill(0));
+  assert.strictEqual(res.length, 1);
+  const hit = res[0];
+  assert.strictEqual(typeof hit.time, 'number');
+  assert.strictEqual(hit.freq, 1000 + 0.2 * 5000);
+  assert.strictEqual(hit.confidence, 0.3);
+  assert.strictEqual(hit.uncertain, false);
+  Math.random = orig;
 });
