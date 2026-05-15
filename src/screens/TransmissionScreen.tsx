@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { colors } from '../theme/colors';
 
 // Added type annotation for navigation prop
@@ -8,13 +9,20 @@ const TransmissionScreen = ({ navigation }: { navigation: any }) => {
   // Log navigation prop
   console.log('[TransmissionScreen] navigation prop:', navigation);
 
+  const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
+
   return (
-    <LinearGradient colors={[colors.bg, '#0A0A1C', colors.card]} style={{ flex: 1 }}>
+    <AnimatedGradient
+      colors={[colors.bg, '#0A0A1C', colors.card]}
+      style={{ flex: 1 }}
+      entering={FadeInRight.duration(300)}
+      exiting={FadeOutLeft.duration(300)}
+    >
       <View style={styles.container}>
         <Text style={styles.h1}>Transmission</Text>
         <Text style={styles.p}>Listening / responses will appear here.</Text>
       </View>
-    </LinearGradient>
+    </AnimatedGradient>
   );
 };
 

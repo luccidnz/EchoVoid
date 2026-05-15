@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { navTheme } from '../theme/theme';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator, StackCardStyleInterpolator } from '@react-navigation/stack';
+import { Easing } from 'react-native-reanimated';
 
 import HomeScreen from '../screens/HomeScreen';
 import TransmissionScreen from '../screens/TransmissionScreen';
@@ -25,7 +26,21 @@ export type RootStackParamList = {
   SessionDetail: { session: any };
 };
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
+
+const fadeConfig = {
+  animation: 'timing',
+  config: {
+    duration: 350,
+    easing: Easing.out(Easing.cubic),
+  },
+};
+
+const forFade: StackCardStyleInterpolator = ({ current }) => ({
+  cardStyle: {
+    opacity: current.progress,
+  },
+});
 
 function AppNavigator() {
   // Log navigation container state
@@ -36,7 +51,14 @@ function AppNavigator() {
       theme={navTheme}
       onStateChange={(state) => console.log('[AppNavigator] Navigation state changed:', state)}
     >
-      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Welcome"
+        screenOptions={{
+          headerShown: false,
+          transitionSpec: { open: fadeConfig, close: fadeConfig },
+          cardStyleInterpolator: forFade,
+        }}
+      >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Transmission" component={TransmissionScreen} />

@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, StatusBar, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { StackScreenProps } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import UIButton from '../components/UIButton';
 import { colors } from '../theme/colors';
 import { hasNativeVoice, startListening } from '../voice/adapter';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = StackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const onBegin = async () => {
@@ -28,10 +29,14 @@ export default function HomeScreen({ navigation }: Props) {
     }
   };
 
+  const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
+
   return (
-    <LinearGradient
+    <AnimatedGradient
       colors={[colors.bg, '#0A0A1C', colors.card]}
       style={styles.flex}
+      entering={FadeIn.duration(300)}
+      exiting={FadeOut.duration(300)}
     >
       <StatusBar barStyle="light-content" />
       <View style={styles.container}>
@@ -45,7 +50,7 @@ export default function HomeScreen({ navigation }: Props) {
 
       {/* decorative neon ring that never intercepts touches */}
       <View pointerEvents="none" style={styles.ring} />
-    </LinearGradient>
+    </AnimatedGradient>
   );
 }
 
