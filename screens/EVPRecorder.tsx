@@ -10,6 +10,7 @@ export default function EVPRecorder() {
   const [uri, setUri] = useState<string | null>(null);
   const [markers, setMarkers] = useState<number[]>([]);
   const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [audioBuffer, setAudioBuffer] = useState<number[]>([]);
 
   const start = async () => {
     await Recorder.startRecording();
@@ -26,6 +27,7 @@ export default function EVPRecorder() {
     setMarkers(Recorder.getMarkers());
     // Simulate anomaly detection (replace with real buffer later)
     const fakeBuffer = new Float32Array(2048).map(() => Math.random() * 2 - 1);
+    setAudioBuffer(Array.from(fakeBuffer));
     setAnomalies(detectAnomalies(fakeBuffer));
   };
 
@@ -70,7 +72,7 @@ export default function EVPRecorder() {
           </View>
         )}
       </View>
-      <SpectrogramPreview />
+      <SpectrogramPreview audioBuffer={audioBuffer} />
       <View style={styles.buttons}>
         {!recording ? (
           <Button title="Start Recording" onPress={start} />
