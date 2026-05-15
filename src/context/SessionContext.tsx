@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useMemo, useState} from 'react';
 import { createEngine, Engine } from '../core/audio/evpEngine';
 import { backupSession } from '../core/cloud/sync';
-import * as FileSystem from 'expo-file-system';
+import { addMessage as storeMessage } from '../core/logging/sessionStore';
 type Session = { id: string; mode: string; startedAt: number; };
 type Ctx = {
   engine: Engine; session: Session|null;
@@ -19,13 +19,9 @@ export function SessionProvider({children}:{children:React.ReactNode}){
   async function addMessage(m: { text: string; conf?: number; tag?: string }) {
     if (!session) return;
     try {
-      const sessionPath = `${FileSystem.documentDirectory}sessions/${session.id}/`;
-      await FileSystem.makeDirectoryAsync(sessionPath, { intermediates: true });
-      const logFile = `${sessionPath}log.txt`;
-      const logEntry = `${new Date().toISOString()} - ${m.text} [${m.conf || 0}] {${m.tag || ''}}\n`;
-      await FileSystem.writeAsStringAsync(logFile, logEntry, { encoding: FileSystem.EncodingType.UTF8 });
+      await storeMessage(session.id, { ...m, ts: Date.now() });
     } catch (error) {
-      console.error('Failed to write message to file:', error);
+      console.error('Failed to store message:', error);
     }
   }
   async function sync(){ if(session) await backupSession(session); }
