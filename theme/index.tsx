@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, PropsWithChildren } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type ThemeName = 'Void' | 'NeonFlux' | 'Astral';
+export type ThemeName = 'Void' | 'NeonFlux' | 'Astral' | 'Lumen' | 'HighContrast';
 
 export interface Theme {
   name: ThemeName;
@@ -44,6 +44,36 @@ export const themes: Record<ThemeName, Theme> = {
     name: 'Astral',
     colors: {
       bg: '#0C0A12', surface: '#151224', primary: '#8AE6FF', accent: '#E6C3FF', text: '#F2F5FF', danger: '#FF4D6D',
+    },
+    spacing: [0, 4, 8, 16, 24, 32],
+    radii: [0, 6, 12, 20],
+    shadow: '0 2px 8px #0008',
+    opacity: { disabled: 0.4, overlay: 0.12 },
+  },
+  Lumen: {
+    name: 'Lumen',
+    colors: {
+      bg: '#FFFFFF',
+      surface: '#F2F2F2',
+      primary: '#007AFF',
+      accent: '#FF2D55',
+      text: '#000000',
+      danger: '#FF3B30',
+    },
+    spacing: [0, 4, 8, 16, 24, 32],
+    radii: [0, 6, 12, 20],
+    shadow: '0 2px 8px #0008',
+    opacity: { disabled: 0.4, overlay: 0.12 },
+  },
+  HighContrast: {
+    name: 'HighContrast',
+    colors: {
+      bg: '#000000',
+      surface: '#000000',
+      primary: '#FFFFFF',
+      accent: '#FFFF00',
+      text: '#FFFFFF',
+      danger: '#FF0000',
     },
     spacing: [0, 4, 8, 16, 24, 32],
     radii: [0, 6, 12, 20],

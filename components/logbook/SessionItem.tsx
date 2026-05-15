@@ -1,7 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useTheme } from '../../theme';
+import { useDesignSystem } from '../../theme/designSystem';
 // TODO: Show session summary, type, date, and quick actions
 export default function SessionItem({ session, onDelete, onView }: { session: any; onDelete: () => void; onView: () => void }) {
+  const { theme } = useTheme();
+  const { spacing, typography } = useDesignSystem();
+  const styles = StyleSheet.create({
+    item: { padding: spacing.lg, borderRadius: spacing.md, backgroundColor: theme.colors.surface, marginVertical: spacing.sm },
+    type: { ...typography.body, fontWeight: '700', color: theme.colors.text },
+    date: { ...typography.caption, color: theme.colors.text + '99', marginTop: spacing.xs },
+    info: { ...typography.caption, color: theme.colors.accent, marginTop: spacing.xs },
+    actions: { flexDirection: 'row', marginTop: spacing.sm },
+    actionButton: { marginRight: spacing.md, padding: spacing.sm, backgroundColor: theme.colors.surface, borderRadius: spacing.sm },
+    actionText: { ...typography.caption, color: theme.colors.text },
+  });
   return (
     <View style={styles.item}>
       <Text style={styles.type}>{session.type || 'Session'}</Text>
@@ -14,12 +27,3 @@ export default function SessionItem({ session, onDelete, onView }: { session: an
     </View>
   );
 }
-const styles = StyleSheet.create({
-  item: { padding: 16, borderRadius: 12, backgroundColor: '#222', marginVertical: 6 },
-  type: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  date: { color: '#aaa', fontSize: 13, marginTop: 2 },
-  info: { color: '#8ff', fontSize: 13, marginTop: 4 },
-  actions: { flexDirection: 'row', marginTop: 8 },
-  actionButton: { marginRight: 12, padding: 8, backgroundColor: '#444', borderRadius: 8 },
-  actionText: { color: '#fff', fontSize: 13 },
-});

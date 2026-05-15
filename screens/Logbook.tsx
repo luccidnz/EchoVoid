@@ -2,9 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import SessionStore from '../services/sessions/SessionStore';
 import SessionItem from '../components/logbook/SessionItem';
+import { useTheme } from '../theme';
+import { useDesignSystem } from '../theme/designSystem';
 
 export default function Logbook({ navigation }: any) {
   const [sessions, setSessions] = useState<any[]>([]);
+  const { theme } = useTheme();
+  const { spacing, typography } = useDesignSystem();
   useEffect(() => {
     (async () => {
       const list = await SessionStore.list();
@@ -12,6 +16,11 @@ export default function Logbook({ navigation }: any) {
     })();
   }, []);
 
+  const styles = StyleSheet.create({
+    flex: { flex: 1, backgroundColor: theme.colors.bg },
+    title: { ...typography.h1, color: theme.colors.text, margin: spacing.lg },
+    empty: { color: theme.colors.text + '88', textAlign: 'center', marginTop: spacing.xxxl },
+  });
   return (
     <View style={styles.flex}>
       <Text style={styles.title}>Logbook</Text>
@@ -29,9 +38,3 @@ export default function Logbook({ navigation }: any) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#111' },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', margin: 16 },
-  empty: { color: '#888', textAlign: 'center', marginTop: 40 },
-});
