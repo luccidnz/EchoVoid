@@ -1,55 +1,71 @@
-
 import { Audio } from 'expo-av';
 import { RecordingOptionsPresets } from 'expo-av/build/Audio/RecordingConstants';
+
 // Simple DSP chain: gain, FX placeholders
-let recording: Audio.Recording | null = null;
-let isActive = false;
-let gain = 1.0;
-let fx: string = 'Echo';
-let onLevel: ((n: number) => void) | null = null;
+class LiveChain {
+  private recording: Audio.Recording | null = null;
+  private isActive = false;
+  private gain = 1.0;
+  private fx: string = 'Echo';
+  private onLevel: ((n: number) => void) | null = null;
+  private levelInterval: ReturnType<typeof setInterval> | null = null;
 
+  async startLiveChain(opts: { onLevel?: (n: number) => void; gain?: number; fx?: string }) {
+    if (this.isActive) return;
+    this.isActive = true;
+    this.gain = opts.gain ?? 1.0;
+    this.fx = opts.fx ?? 'Echo';
+    this.onLevel = opts.onLevel ?? null;
+    console.time('LiveChain:start');
+    try {
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      this.recording = new Audio.Recording();
+      await this.recording.prepareToRecordAsync(RecordingOptionsPresets.HIGH_QUALITY);
+      await this.recording.startAsync();
+      // Simulate level monitoring (real: use Audio API or native module)
+      this.levelInterval = setInterval(() => {
+        if (!this.isActive || !this.onLevel) return;
+        const mockLevel = Math.random() * this.gain;
+        this.onLevel(mockLevel);
+      }, 100);
+    } catch (e) {
+      console.error('LiveChain:start error', { error: e });
+      this.isActive = false;
+      throw e;
+    } finally {
+      console.timeEnd('LiveChain:start');
+    }
+  }
 
-	export async function startLiveChain(opts: { onLevel?: (n: number) => void; gain?: number; fx?: string }) {
-		if (isActive) return;
-		isActive = true;
-		gain = opts.gain ?? 1.0;
-		fx = opts.fx ?? 'Echo';
-		onLevel = opts.onLevel ?? null;
-		console.time('LiveChain:start');
-		try {
-			await Audio.requestPermissionsAsync();
-			await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-			recording = new Audio.Recording();
-			await recording.prepareToRecordAsync(RecordingOptionsPresets.HIGH_QUALITY);
-			await recording.startAsync();
-			// Simulate level monitoring (real: use Audio API or native module)
-			const levelInterval = setInterval(() => {
-				if (!isActive || !onLevel) return;
-				const mockLevel = Math.random() * gain;
-				onLevel(mockLevel);
-			}, 100);
-			(recording as any)._levelInterval = levelInterval;
-		} catch (e) {
-			// handle error
-		}
-		console.timeEnd('LiveChain:start');
-	}
+  async stopLiveChain() {
+    console.time('LiveChain:stop');
+    this.isActive = false;
+    if (this.levelInterval) {
+      clearInterval(this.levelInterval);
+      this.levelInterval = null;
+    }
+    if (this.recording) {
+      try {
+        await this.recording.stopAndUnloadAsync();
+      } catch {}
+      this.recording = null;
+    }
+    console.timeEnd('LiveChain:stop');
+  }
 
-	export async function stopLiveChain() {
-		console.time('LiveChain:stop');
-		isActive = false;
-		if (recording) {
-			try {
-				await recording.stopAndUnloadAsync();
-			} catch {}
-			if ((recording as any)._levelInterval) clearInterval((recording as any)._levelInterval);
-			recording = null;
-		}
-		console.timeEnd('LiveChain:stop');
-	}
+  setGain(g: number) {
+    this.gain = g;
+  }
 
-export function setGain(g: number) { gain = g; }
-export function setFx(f: string) { fx = f; }
-export function setOnLevel(cb: (n: number) => void) { onLevel = cb; }
+  setFx(f: string) {
+    this.fx = f;
+  }
 
-export default { startLiveChain, stopLiveChain, setGain, setFx, setOnLevel };
+  setOnLevel(cb: (n: number) => void) {
+    this.onLevel = cb;
+  }
+}
+
+export default new LiveChain();
+
