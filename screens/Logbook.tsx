@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import SessionStore from '../services/sessions/SessionStore';
 import SessionItem from '../components/logbook/SessionItem';
 
 export default function Logbook({ navigation }: any) {
   const [sessions, setSessions] = useState<any[]>([]);
-  useEffect(() => {
-    (async () => {
-      const list = await SessionStore.list();
-      setSessions(list.reverse());
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        const list = await SessionStore.list();
+        setSessions(list.reverse());
+      })();
+    }, [])
+  );
 
   return (
     <View style={styles.flex}>
