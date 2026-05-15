@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Audio } from 'expo-av';
 import EVoidButton from '../ui/EVoidButton';
 import { shareSessionZip } from '../../services/export/zipSession';
+import { playSessionAudio } from '../../services/audio/playSessionAudio';
 
 export default function SessionDetail({ route }: any) {
   const session = route?.params?.session;
@@ -10,28 +11,9 @@ export default function SessionDetail({ route }: any) {
   const soundRef = useRef<Audio.Sound | null>(null);
 
   const handlePlay = async () => {
-    if (!session?.uri) return;
-    if (playing) {
-      if (soundRef.current) {
-        await soundRef.current.stopAsync();
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-      setPlaying(false);
-      return;
-    }
-    try {
-      const { sound } = await Audio.Sound.createAsync({ uri: session.uri }, { shouldPlay: true });
-      soundRef.current = sound;
-      setPlaying(true);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded || status.didJustFinish) {
-          setPlaying(false);
-          sound.unloadAsync();
-          soundRef.current = null;
-        }
-      });
-    } catch {}
+    await playSessionAudio(session, playing, setPlaying, soundRef, Audio, (title: string, message?: string) =>
+      Alert.alert(title, message)
+    );
   };
 
   return (
@@ -56,10 +38,11 @@ export default function SessionDetail({ route }: any) {
       ) : (
         <Text style={styles.value}>None</Text>
       )}
-  <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: 24 }} />
+      <EVoidButton label="Export Session" onPress={() => shareSessionZip(session)} style={{ marginTop: 24 }} />
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   detail: { flex: 1, padding: 20, backgroundColor: '#111' },
   title: { fontSize: 24, fontWeight: '800', color: '#fff', marginBottom: 16 },
