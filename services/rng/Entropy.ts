@@ -8,45 +8,64 @@ export default async function getEntropy() {
   try {
     // Get microphone RMS
     const { granted } = await Audio.requestPermissionsAsync();
-    if (granted) {
-      const recording = new Audio.Recording();
-      const recordingOptions = {
-        android: {
-          extension: '.m4a',
-          outputFormat: 2, // Default MPEG_4
-          audioEncoder: 3, // Default AAC
-          sampleRate: 44100,
-          numberOfChannels: 2,
-          bitRate: 128000,
-        },
-        ios: {
-          extension: '.caf',
-          audioQuality: 127, // Maximum quality
-          sampleRate: 44100,
-          numberOfChannels: 2,
-          bitRate: 128000,
-          linearPCMBitDepth: 16,
-          linearPCMIsBigEndian: false,
-          linearPCMIsFloat: false,
-        },
-        web: {
-          mimeType: 'audio/webm',
-          bitsPerSecond: 128000,
-        },
-      };
+    if (!granted) {
+      return Math.random();
+    }
+
+    let recording: Audio.Recording | null = null;
+    const recordingOptions = {
+      android: {
+        extension: '.m4a',
+        outputFormat: 2, // Default MPEG_4
+        audioEncoder: 3, // Default AAC
+        sampleRate: 44100,
+        numberOfChannels: 2,
+        bitRate: 128000,
+      },
+      ios: {
+        extension: '.caf',
+        audioQuality: 127, // Maximum quality
+        sampleRate: 44100,
+        numberOfChannels: 2,
+        bitRate: 128000,
+        linearPCMBitDepth: 16,
+        linearPCMIsBigEndian: false,
+        linearPCMIsFloat: false,
+      },
+      web: {
+        mimeType: 'audio/webm',
+        bitsPerSecond: 128000,
+      },
+    };
+
+    try {
+      recording = new Audio.Recording();
       await recording.prepareToRecordAsync(recordingOptions);
       await recording.startAsync();
       const status = await recording.getStatusAsync();
       micRMS = status.metering || 0;
-      await recording.stopAndUnloadAsync();
+    } finally {
+      if (recording) {
+        try {
+          await recording.stopAndUnloadAsync();
+        } catch (e) {
+          console.error('Failed to stop recording:', e);
+        }
+      }
     }
 
     // Get accelerometer data
-    const accelListener = Accelerometer.addListener((data) => {
-      accelData = data;
-    });
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for data
-    accelListener.remove();
+    let accelListener: any;
+    try {
+      accelListener = Accelerometer.addListener((data) => {
+        accelData = data;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for data
+    } finally {
+      if (accelListener) {
+        accelListener.remove();
+      }
+    }
   } catch (error) {
     console.error('Failed to gather entropy sources:', error);
   }
