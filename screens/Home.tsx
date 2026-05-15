@@ -5,13 +5,13 @@ import { useTheme } from '../theme';
 import ParticleField from '../components/fx/ParticleField';
 import EVoidButton from '../components/ui/EVoidButton';
 
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../src/navigation/AppNavigator';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Home() {
   const { theme } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.bg }]}> 
       <ParticleField />
