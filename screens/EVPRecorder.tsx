@@ -12,16 +12,21 @@ export default function EVPRecorder() {
   const [anomalies, setAnomalies] = useState<any[]>([]);
 
   const start = async () => {
-    await Recorder.startRecording();
-    setRecording(true);
-    setUri(null);
-    setMarkers([]);
-    setAnomalies([]);
+    try {
+      await Recorder.startRecording();
+      setUri(null);
+      setMarkers([]);
+      setAnomalies([]);
+    } catch (err: any) {
+      Alert.alert('Recording Failed', err.message || 'Unable to start recording.');
+    } finally {
+      setRecording(Recorder.isRecording());
+    }
   };
 
   const stop = async () => {
     const result = await Recorder.stopRecording();
-    setRecording(false);
+    setRecording(Recorder.isRecording());
     setUri(result);
     setMarkers(Recorder.getMarkers());
     // Simulate anomaly detection (replace with real buffer later)
