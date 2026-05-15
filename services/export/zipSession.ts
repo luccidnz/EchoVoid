@@ -2,26 +2,46 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as Crypto from 'expo-crypto';
+import { zip as zipDirectory } from 'react-native-zip-archive';
 
-// Minimal zip: just copy JSON and media to a folder, return folder path (simulate zip)
+// Create a real zip archive of the session and return the zip file path
 export default async function zipSession(session: any) {
-  const tmpDir = FileSystem.cacheDirectory + 'session_' + (await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, session.id)) + '/';
-  await FileSystem.makeDirectoryAsync(tmpDir, { intermediates: true });
-  // Write session JSON
-  const jsonPath = tmpDir + 'session.json';
-  await FileSystem.writeAsStringAsync(jsonPath, JSON.stringify(session, null, 2));
-  // Copy media
-  let mediaPath = null;
-  if (session.uri) {
-    const ext = session.uri.split('.').pop();
-    mediaPath = tmpDir + 'audio.' + ext;
-    await FileSystem.copyAsync({ from: session.uri, to: mediaPath });
+  const hash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, session.id);
+  const dir = `${FileSystem.cacheDirectory}session_${hash}`;
+  try {
+    await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+    const jsonPath = `${dir}/session.json`;
+    try {
+      await FileSystem.writeAsStringAsync(jsonPath, JSON.stringify(session, null, 2));
+    } catch {
+      throw new Error('Failed to write session data');
+    }
+
+    if (session.uri) {
+      const info = await FileSystem.getInfoAsync(session.uri);
+      if (!info.exists) throw new Error('Media file missing');
+      const ext = session.uri.split('.').pop();
+      try {
+        await FileSystem.copyAsync({ from: session.uri, to: `${dir}/audio.${ext}` });
+      } catch {
+        throw new Error('Failed to copy media');
+      }
+    }
+
+    const zipPath = `${dir}.zip`;
+    await zipDirectory(dir, zipPath);
+    return zipPath;
+  } catch (error) {
+    console.error('zipSession error', error);
+    throw error;
   }
-  // Simulate zip: return folder path (could use a real zip lib)
-  return tmpDir;
 }
 
 export async function shareSessionZip(session: any) {
-  const zipPath = await zipSession(session);
-  await Sharing.shareAsync(zipPath);
+  try {
+    const zipPath = await zipSession(session);
+    await Sharing.shareAsync(zipPath);
+  } catch (error) {
+    console.error('shareSessionZip error', error);
+  }
 }
