@@ -1,11 +1,12 @@
 import { detectAnomalies } from '../src/core/anomaly/detector';
 
 describe('Anomaly Detector', () => {
-  it('should return anomalies for a sample input', () => {
+  it('returns time indexed hits', () => {
     const sample = new Float32Array([0.1, 0.2, 0.9, 0.3, 0.8]);
     const result = detectAnomalies(sample);
-    expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBeGreaterThanOrEqual(0);
+    expect(result.length).toBe(2);
+    expect(result[0].time).toBe(2);
+    expect(result[1].time).toBe(4);
   });
 
   it('should return an empty array for no anomalies', () => {
@@ -14,12 +15,10 @@ describe('Anomaly Detector', () => {
     expect(result).toEqual([]);
   });
 
-  it('should detect anomalies with confidence above threshold', () => {
-    const sample = new Float32Array([0.5, 0.6, 0.7, 0.8, 0.9]);
+  it('includes frequency and confidence', () => {
+    const sample = new Float32Array([0.6, 0.7]);
     const result = detectAnomalies(sample);
-    result.forEach((anomaly) => {
-      expect(anomaly.confidence).toBeGreaterThanOrEqual(0);
-      expect(anomaly.freq).toBeGreaterThan(0);
-    });
+    expect(result[0].freq).toBeGreaterThan(0);
+    expect(result[0].confidence).toBe(0.6);
   });
 });
