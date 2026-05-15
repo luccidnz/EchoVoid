@@ -15,17 +15,18 @@ export default function SpiritBoard() {
 
   // Use entropy from sensors for pointer movement
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPointer((p) => {
-        // Use entropy to bias movement
-        const e = getEntropy();
-        let row = p.row + (e > 0.5 ? 1 : -1) * (e > 0.7 ? 1 : 0);
-        let col = p.col + (e < 0.5 ? 1 : -1) * (e < 0.3 ? 1 : 0);
-        row = Math.max(0, Math.min(LETTERS.length - 1, row));
-        col = Math.max(0, Math.min(LETTERS[0].length - 1, col));
-        return { row, col };
-      });
-    }, 1200);
+      const interval = setInterval(() => {
+        getEntropy().then((e) => {
+          setPointer((p) => {
+            // Use entropy to bias movement
+            let row = p.row + (e > 0.5 ? 1 : -1) * (e > 0.7 ? 1 : 0);
+            let col = p.col + (e < 0.5 ? 1 : -1) * (e < 0.3 ? 1 : 0);
+            row = Math.max(0, Math.min(LETTERS.length - 1, row));
+            col = Math.max(0, Math.min(LETTERS[0].length - 1, col));
+            return { row, col };
+          });
+        });
+      }, 1200);
     return () => clearInterval(interval);
   }, []);
 
