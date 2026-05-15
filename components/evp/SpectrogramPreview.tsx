@@ -1,15 +1,14 @@
 import React from 'react';
-import { View } from 'react-native';
 import { Svg, Rect } from 'react-native-svg';
 
 interface SpectrogramPreviewProps {
-  audioBuffer: number[];
+  audioBuffer?: number[];
 }
 
-export default function SpectrogramPreview({ audioBuffer }: SpectrogramPreviewProps) {
+export default function SpectrogramPreview({ audioBuffer = [] }: SpectrogramPreviewProps) {
   const width = 300;
   const height = 80;
-  const barWidth = width / audioBuffer.length;
+  const barWidth = audioBuffer.length > 0 ? width / audioBuffer.length : width;
 
   return (
     <Svg height={height} width={width} style={{ backgroundColor: '#222' }}>
