@@ -5,6 +5,7 @@ export const themeColors = {
 import React, { PropsWithChildren } from 'react';
 import { DefaultTheme, Theme as NavTheme } from '@react-navigation/native';
 import { colors } from './colors';
+import { useTheme } from '../../theme';
 
 export const navTheme: NavTheme = {
   ...DefaultTheme,
@@ -19,14 +20,14 @@ export const navTheme: NavTheme = {
   },
 };
 
-import { ImageBackground, StyleSheet, View, Animated, Easing } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-
+  const { theme } = useTheme();
   return (
     <View style={{ flex: 1 }}>
       {/* Gradient background for astral/spiritual effect */}
-      <View style={styles.gradientBg}>
+      <View style={[styles.gradientBg, { backgroundColor: theme.colors.bg }]}>
         {children}
       </View>
     </View>
@@ -41,8 +42,5 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: -1,
-    backgroundColor: '#2C1B0F', // lighter brown for better contrast
   },
-  bg: { flex: 1, width: '100%', height: '100%', justifyContent: 'center', backgroundColor: '#2C1B0F' },
-  overlay: { flex: 1, opacity: 0.08, justifyContent: 'center' }, // lower overlay opacity for brightness
 });
