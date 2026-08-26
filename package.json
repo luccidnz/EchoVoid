@@ -30,6 +30,7 @@
     "@babel/core": "^7.25.2",
     "@types/node": "^22.10.0",
     "@types/react": "~19.1.10",
+    "babel-preset-expo": "54.0.12",
     "tsx": "^4.20.3",
     "typescript": "~5.9.2"
   }
