@@ -39,19 +39,23 @@ jobs:
       - name: Generate native Android project
         env:
           CI: '1'
+          NODE_ENV: production
         run: npx expo prebuild --platform android --clean
 
-      - name: Configure compact ARM64 release build
+      - name: Configure ARM64 release build
         working-directory: android
         run: |
           cat >> gradle.properties <<'EOF'
           reactNativeArchitectures=arm64-v8a
-          android.enableMinifyInReleaseBuilds=true
-          android.enableShrinkResourcesInReleaseBuilds=true
+          android.enableMinifyInReleaseBuilds=false
+          android.enableShrinkResourcesInReleaseBuilds=false
+          org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=1024m
           EOF
 
-      - name: Build optimised installable APK
+      - name: Build installable ARM64 release APK
         working-directory: android
+        env:
+          NODE_ENV: production
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --stacktrace
@@ -76,7 +80,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES="Optimised standalone Android test APK for modern ARM64 phones such as the Galaxy S25. Built from rebuild/ech0void-core-v2. No Expo Go, computer, Metro server, or USB connection is required. This is a test build signed with the development key, not the final Play Store release."
+          NOTES="Standalone ARM64 Android test APK for modern phones such as the Galaxy S25. Built from rebuild/ech0void-core-v2. No Expo Go, computer, Metro server, or USB connection is required. This is a test build signed with the development key, not the final Play Store release."
           if gh release view phone-build --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit phone-build --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Ech0Void V2 Phone Build" --notes "$NOTES"
           else
