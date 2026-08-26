@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "Ech0Void Canary",
-    "slug": "ech0void-canary",
-    "version": "0.0.1",
+    "name": "VOID CANARY 57",
+    "slug": "void-canary-57",
+    "version": "0.0.57",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "android": {
-      "package": "app.echovoid.canary",
-      "versionCode": 1
+      "package": "app.echovoid.canary57",
+      "versionCode": 57
     }
   }
 }
