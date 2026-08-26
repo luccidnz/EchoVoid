@@ -1,0 +1,28 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.echovoid.nativev3'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'app.echovoid.nativev3'
+        minSdk 24
+        targetSdk 35
+        versionCode 300
+        versionName '3.0.0-native-alpha'
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ''
+            versionNameSuffix ''
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
