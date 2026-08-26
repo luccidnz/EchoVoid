@@ -1,0 +1,36 @@
+name: Ech0Void V2 validation
+
+on:
+  push:
+    branches:
+      - rebuild/ech0void-core-v2
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Expo dependency check
+        run: npx expo install --check
+
+      - name: Pure core tests
+        run: npm test
+
+      - name: TypeScript
+        run: npm run typecheck
