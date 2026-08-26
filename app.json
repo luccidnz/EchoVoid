@@ -3,11 +3,13 @@
     "name": "Ech0Void",
     "slug": "echovoid-app",
     "scheme": "echovoid",
-    "version": "2.0.0",
+    "version": "2.0.1",
+    "newArchEnabled": false,
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "android": {
       "package": "app.echovoid.spirit",
+      "versionCode": 201,
       "permissions": ["RECORD_AUDIO"]
     },
     "plugins": [
