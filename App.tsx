@@ -4,13 +4,13 @@ import { StatusBar, StyleSheet, Text, View } from 'react-native';
 export default function App() {
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#020408" />
-      <Text style={styles.kicker}>ECH0VOID // NATIVE CANARY</Text>
+      <StatusBar barStyle="light-content" backgroundColor="#17001F" />
+      <Text style={styles.kicker}>VOID CANARY // SDK 57</Text>
       <Text style={styles.title}>BOOT SUCCESS</Text>
       <Text style={styles.body}>
-        Bare React Native shell is alive on this phone.
+        Expo SDK 57 + React Native 0.86 is alive on this phone.
       </Text>
-      <Text style={styles.code}>CANARY 001</Text>
+      <Text style={styles.code}>CANARY 057</Text>
     </View>
   );
 }
@@ -18,35 +18,35 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#020408',
+    backgroundColor: '#17001F',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 28,
+    padding: 28
   },
   kicker: {
-    color: '#47E9FF',
-    fontSize: 11,
+    color: '#FF4FF8',
+    fontSize: 12,
     fontWeight: '900',
-    letterSpacing: 2.2,
+    letterSpacing: 2.2
   },
   title: {
-    color: '#F4F7FB',
-    fontSize: 34,
+    color: '#FFFFFF',
+    fontSize: 36,
     fontWeight: '900',
-    marginTop: 10,
+    marginTop: 12
   },
   body: {
-    color: '#AEB8C7',
-    fontSize: 15,
+    color: '#E6D8EA',
+    fontSize: 16,
     textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 22,
+    marginTop: 14,
+    lineHeight: 23
   },
   code: {
-    color: '#9A7CFF',
-    fontSize: 11,
+    color: '#67F7FF',
+    fontSize: 12,
     fontWeight: '900',
-    letterSpacing: 1.8,
-    marginTop: 26,
-  },
+    letterSpacing: 2,
+    marginTop: 28
+  }
 });
