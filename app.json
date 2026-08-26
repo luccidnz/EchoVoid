@@ -1,32 +1,23 @@
 {
   "expo": {
-    "name": "EchoVoid: Spirit Communicator",
+    "name": "Ech0Void",
     "slug": "echovoid-app",
     "scheme": "echovoid",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#0B0B0B"
-    },
     "userInterfaceStyle": "dark",
     "android": {
       "package": "app.echovoid.spirit",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#0B0B0B"
-      },
-      "permissions": [
-        "RECORD_AUDIO",
-        "WAKE_LOCK",
-        "FOREGROUND_SERVICE"
-      ]
+      "permissions": ["RECORD_AUDIO"]
     },
     "plugins": [
-      "expo-router",
-      "expo-mail-composer"
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow Ech0Void to record local investigation sessions.",
+          "recordAudioAndroid": true
+        }
+      ]
     ]
   }
 }
