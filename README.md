@@ -4,6 +4,21 @@ Ech0Void is a local-first experimental ITC audio instrument for Android/iOS buil
 
 This rebuild replaces the old disconnected test navigator, placeholder transmission screen, random dictionary/TTS capture path and empty noise-bank assets with a functioning three-engine instrument.
 
+## Install directly on an Android phone
+
+Every push to `rebuild/ech0void-core-v2` now builds an installable Android APK on GitHub Actions and publishes it to the repository's **Ech0Void V2 Phone Build** prerelease.
+
+On the phone:
+
+1. Open the GitHub repository.
+2. Open **Releases**.
+3. Open **Ech0Void V2 Phone Build**.
+4. Download `Ech0Void-v2-phone.apk`.
+5. Allow installation from your browser/GitHub app if Android asks.
+6. Tap the APK and install it.
+
+This test APK runs directly on the phone. It does not require VS Code, Termux, Expo Go, Metro, a USB cable, or a computer after installation.
+
 ## The three channels
 
 - **EchoBox** — locally generated vocal-like fragments, layered overlaps and decaying echoes.
@@ -36,9 +51,7 @@ Sessions save locally with:
 
 No backend is required for V2 core operation.
 
-## Run on a physical phone with Expo Go
-
-The rebuild targets **Expo SDK 54**, matching the store Expo Go line used for physical-device testing.
+## Run through Expo during development
 
 ```bash
 npm install
