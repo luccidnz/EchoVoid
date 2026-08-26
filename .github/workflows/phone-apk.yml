@@ -41,20 +41,34 @@ jobs:
           CI: '1'
         run: npx expo prebuild --platform android --clean
 
-      - name: Build installable debug APK
+      - name: Configure compact ARM64 release build
+        working-directory: android
+        run: |
+          cat >> gradle.properties <<'EOF'
+          reactNativeArchitectures=arm64-v8a
+          android.enableMinifyInReleaseBuilds=true
+          android.enableShrinkResourcesInReleaseBuilds=true
+          EOF
+
+      - name: Build optimised installable APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+          ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --stacktrace
 
       - name: Prepare phone APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Ech0Void-v2-phone.apk
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk Ech0Void-v2-phone-arm64.apk
+          ls -lh Ech0Void-v2-phone-arm64.apk
+          sha256sum Ech0Void-v2-phone-arm64.apk | tee Ech0Void-v2-phone-arm64.sha256
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ech0Void-v2-phone-apk
-          path: Ech0Void-v2-phone.apk
+          name: Ech0Void-v2-phone-arm64-apk
+          path: |
+            Ech0Void-v2-phone-arm64.apk
+            Ech0Void-v2-phone-arm64.sha256
           if-no-files-found: error
           retention-days: 30
 
@@ -62,9 +76,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          NOTES="Optimised standalone Android test APK for modern ARM64 phones such as the Galaxy S25. Built from rebuild/ech0void-core-v2. No Expo Go, computer, Metro server, or USB connection is required. This is a test build signed with the development key, not the final Play Store release."
           if gh release view phone-build --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release edit phone-build --repo "$GITHUB_REPOSITORY" --title "Ech0Void V2 Phone Build" --notes "Installable Android test APK built automatically from rebuild/ech0void-core-v2. This is a debug/test build, not the final Play Store release."
+            gh release edit phone-build --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Ech0Void V2 Phone Build" --notes "$NOTES"
           else
-            gh release create phone-build --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Ech0Void V2 Phone Build" --notes "Installable Android test APK built automatically from rebuild/ech0void-core-v2. This is a debug/test build, not the final Play Store release."
+            gh release create phone-build --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Ech0Void V2 Phone Build" --notes "$NOTES"
           fi
-          gh release upload phone-build Ech0Void-v2-phone.apk --repo "$GITHUB_REPOSITORY" --clobber
+          gh release delete-asset phone-build Ech0Void-v2-phone.apk --repo "$GITHUB_REPOSITORY" -y 2>/dev/null || true
+          gh release upload phone-build Ech0Void-v2-phone-arm64.apk Ech0Void-v2-phone-arm64.sha256 --repo "$GITHUB_REPOSITORY" --clobber
