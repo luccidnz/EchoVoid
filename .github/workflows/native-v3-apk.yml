@@ -3,7 +3,7 @@ name: Build Ech0Void Native V3 APK
 on:
   push:
     branches:
-      - rebuild/ech0void-native-v3
+      - rebuild/ech0void-native-v3-real-banks
   workflow_dispatch:
 
 permissions:
@@ -88,6 +88,11 @@ jobs:
 
           echo "Prepared source banks:"
           ls -lh "$RAW"/vox_*.wav "$RAW"/voice_metro.wav
+
+      - name: Render real long wordless banks
+        run: |
+          python3 nativeapp/tools/build_wordless_banks.py
+          ls -lh nativeapp/app/src/main/res/raw/bank_*.wav
 
       - name: Build native Android APK
         working-directory: nativeapp
