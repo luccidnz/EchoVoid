@@ -16,12 +16,14 @@ import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Space;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-public final class MainActivity extends Activity implements SensorFusion.Listener, Ech0Engine.Listener {
+public final class MainActivity extends Activity implements SensorFusion.Listener, Ech0Engine.Listener, WordlessGateEngine.Listener {
     private static final int MIC_REQUEST = 601;
     private static final int BG = Color.rgb(3, 4, 8);
     private static final int PANEL = Color.rgb(10, 14, 21);
@@ -52,6 +54,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
     private SessionStore store;
     private SensorFusion sensors;
     private Ech0Engine engine;
+    private WordlessGateEngine gateEngine;
     private MediaRecorder recorder;
     private MediaPlayer player;
     private SessionStore.Session currentSession;
@@ -70,6 +73,8 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
     private float texture = 0.38f;
     private float sensorMix = 0.55f;
     private float output = 0.68f;
+    private float gateReverb = 0.42f;
+    private String selectedGateBank = "mixed";
 
     private TextView activityValue;
     private TextView magneticValue;
@@ -137,17 +142,28 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         LinearLayout page = page(scroll);
 
         addKicker(page, "ECH0VOID // FREQUENCY INSTRUMENT");
-        addTitle(page, "Choose a channel");
-        TextView sub = body("Native Android core • offline • local session evidence");
+        addTitle(page, "Open the signal");
+        TextView sub = body("Manual wordless gate • native Android • offline • local evidence");
         sub.setTextColor(VIOLET);
         page.addView(sub);
+
+        page.addView(modeCard(
+            "ECH0GATE",
+            "Primary ITC instrument. Reversed + half-speed wordless human banks stay silent until YOU open the gate.",
+            GREEN,
+            this::startGateSession
+        ), marginTop(18));
+
+        TextView experimental = small("EXPERIMENTAL SECONDARY ENGINES", MUTED);
+        experimental.setPadding(0, dp(22), 0, 0);
+        page.addView(experimental);
 
         page.addView(modeCard(
             "ECHOBOX",
             "Short recorded human micro-fragments with silence, overlap and decaying repeats.",
             CYAN,
             () -> startSession(Ech0Engine.Mode.ECHO_BOX)
-        ), marginTop(18));
+        ), marginTop(10));
 
         page.addView(modeCard(
             "FIELD DRIFT",
@@ -196,6 +212,190 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         box.addView(go);
         box.setOnClickListener(v -> onPress.run());
         return box;
+    }
+
+    private void startGateSession() {
+        stopPlayback();
+        stopActiveSession(false);
+
+        currentSession = new SessionStore.Session();
+        currentSession.id = "native-" + System.currentTimeMillis();
+        currentSession.mode = "Ech0Gate";
+        currentSession.startedAt = System.currentTimeMillis();
+        sessionStartRealtime = currentSession.startedAt;
+
+        activitySum = 0;
+        magneticSum = 0;
+        sensorSamples = 0;
+        peakActivity = 0;
+        ledgerLines.clear();
+
+        showGateTransmission();
+        sensors.start();
+
+        try {
+            gateEngine = new WordlessGateEngine(this, this);
+            gateEngine.setBank(selectedGateBank);
+            gateEngine.setOutput(output);
+            gateEngine.setReverb(gateReverb);
+            gateEngine.setSensorMix(sensorMix);
+            gateEngine.updateSensor(currentActivity, currentSeed);
+            gateEngine.start();
+        } catch (Exception e) {
+            gateEngine = null;
+            setStatus("Wordless gate bank failed to load", DANGER);
+            Toast.makeText(this, "Gate engine error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startRoomRecorder();
+        } else {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, MIC_REQUEST);
+            setStatus("Gate ready • mic permission requested", AMBER);
+        }
+
+        mainHandler.removeCallbacks(tick);
+        mainHandler.post(tick);
+    }
+
+    private void showGateTransmission() {
+        ScrollView scroll = shell();
+        LinearLayout page = page(scroll);
+
+        TextView back = small("← END / HOME", MUTED);
+        back.setPadding(0, dp(4), 0, dp(14));
+        back.setOnClickListener(v -> stopAndSaveSession());
+        page.addView(back);
+
+        addKicker(page, "ECH0GATE // WORDLESS HUMAN SIGNAL");
+        addTitle(page, "Ask. Open. Listen.");
+
+        LinearLayout metrics = horizontal();
+        activityValue = metric(metrics, "ACTIVITY", "0%");
+        magneticValue = metric(metrics, "MAG FIELD", "— µT");
+        elapsedValue = metric(metrics, "ELAPSED", "00:00");
+        page.addView(metrics, marginTop(16));
+
+        statusValue = text("Preparing silent wordless bank…", 12, AMBER, true);
+        statusValue.setPadding(0, dp(14), 0, dp(8));
+        page.addView(statusValue);
+
+        page.addView(card(
+            "HOW THIS SIGNAL IS BUILT",
+            "Human speech is reversed, played at roughly 50% speed, split into ~2-second wordless chunks and shuffled. The bank keeps moving underneath — but you hear NOTHING until you manually open the gate."
+        ), marginTop(8));
+
+        TextView bankHead = text("VOICE BANK", 11, TEXT, true);
+        bankHead.setPadding(0, dp(16), 0, dp(6));
+        page.addView(bankHead);
+
+        Spinner bankSpinner = new Spinner(this);
+        String[] bankLabels = new String[]{
+            "Mixed Human",
+            "Male Blend",
+            "Female Voice",
+            "Foreign Blend",
+            "Radio / Announcement"
+        };
+        String[] bankIds = new String[]{"mixed", "male", "female", "foreign", "radio"};
+        ArrayAdapter<String> bankAdapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            bankLabels
+        );
+        bankSpinner.setAdapter(bankAdapter);
+        int selectedIndex = 0;
+        for (int i = 0; i < bankIds.length; i++) {
+            if (bankIds[i].equals(selectedGateBank)) selectedIndex = i;
+        }
+        bankSpinner.setSelection(selectedIndex);
+        bankSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                selectedGateBank = bankIds[position];
+                if (gateEngine != null) gateEngine.setBank(selectedGateBank);
+            }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
+        page.addView(bankSpinner);
+
+        addSlider(page, "REVERB / TAIL", gateReverb, v -> {
+            gateReverb = v;
+            if (gateEngine != null) gateEngine.setReverb(v);
+        });
+        addSlider(page, "SENSOR BIAS", sensorMix, v -> {
+            sensorMix = v;
+            if (gateEngine != null) gateEngine.setSensorMix(v);
+        });
+        addSlider(page, "OUTPUT", output, v -> {
+            output = v;
+            if (gateEngine != null) gateEngine.setOutput(v);
+        });
+
+        LinearLayout gateCard = vertical();
+        gateCard.setPadding(dp(16), dp(16), dp(16), dp(18));
+        gateCard.setBackground(panelDrawable());
+
+        LinearLayout gateHeader = horizontal();
+        TextView gateTitle = text("PORTAL GATE", 14, GREEN, true);
+        TextView gatePct = text("CLOSED", 12, MUTED, true);
+        gatePct.setGravity(Gravity.END);
+        gateHeader.addView(gateTitle, weight());
+        gateHeader.addView(gatePct, wrap());
+        gateCard.addView(gateHeader);
+
+        TextView gateHelp = text("Drag right and HOLD for ~1–3 seconds while asking/listening. Release your finger and Ech0Void snaps the gate shut.", 12, MUTED, false);
+        gateHelp.setPadding(0, dp(8), 0, dp(8));
+        gateCard.addView(gateHelp);
+
+        SeekBar gateBar = new SeekBar(this);
+        gateBar.setMax(100);
+        gateBar.setProgress(0);
+        gateBar.setProgressTintList(android.content.res.ColorStateList.valueOf(GREEN));
+        gateBar.setThumbTintList(android.content.res.ColorStateList.valueOf(GREEN));
+        gateBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float value = progress / 100f;
+                gatePct.setText(progress < 5 ? "CLOSED" : progress + "% OPEN");
+                gatePct.setTextColor(progress < 5 ? MUTED : GREEN);
+                if (gateEngine != null) gateEngine.setGate(value);
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {
+                if (gateEngine != null) gateEngine.setGate(0f);
+                seekBar.setProgress(0);
+                gatePct.setText("CLOSED");
+                gatePct.setTextColor(MUTED);
+            }
+        });
+        gateCard.addView(gateBar);
+        page.addView(gateCard, marginTop(16));
+
+        page.addView(card(
+            "SENSOR BIAS",
+            "Sensor Bias never opens the gate by itself. At higher settings, phone sensor activity can alter which hidden chunk is under the gate when YOU open it. Set it to 0% for a purely manual control session."
+        ), marginTop(10));
+
+        TextView ledgerHead = text("GATE WINDOW LEDGER", 11, CYAN, true);
+        ledgerHead.setPadding(0, dp(18), 0, dp(8));
+        page.addView(ledgerHead);
+
+        ledgerText = text("No gate windows yet. Ask a question, open the gate briefly, then close it.", 11, MUTED, false);
+        ledgerText.setTypeface(Typeface.MONOSPACE);
+        ledgerText.setPadding(dp(14), dp(14), dp(14), dp(14));
+        ledgerText.setBackground(panelDrawable());
+        page.addView(ledgerText);
+
+        Button mark = secondaryButton("MARK WHAT I HEARD");
+        mark.setOnClickListener(v -> markMoment());
+        page.addView(mark, marginTop(14));
+
+        Button stop = dangerButton("STOP + SAVE SESSION");
+        stop.setOnClickListener(v -> stopAndSaveSession());
+        page.addView(stop, marginTop(10));
+
+        setContentView(scroll);
     }
 
     private void startSession(Ech0Engine.Mode mode) {
@@ -326,6 +526,11 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
     private void pushSettings() {
         if (engine != null) engine.setSettings(intensity, variation, texture, sensorMix, output);
+        if (gateEngine != null) {
+            gateEngine.setOutput(output);
+            gateEngine.setReverb(gateReverb);
+            gateEngine.setSensorMix(sensorMix);
+        }
     }
 
     private void startRoomRecorder() {
@@ -397,6 +602,10 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
             engine.stop();
             engine = null;
         }
+        if (gateEngine != null) {
+            gateEngine.stop();
+            gateEngine = null;
+        }
         if (sensors != null) sensors.stop();
         stopRoomRecorder();
 
@@ -419,6 +628,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         currentMagUt = magneticFieldUt;
         currentSeed = seed;
         if (engine != null) engine.updateSensor(activity, seed);
+        if (gateEngine != null) gateEngine.updateSensor(activity, seed);
 
         if (currentSession != null) {
             activitySum += activity;
@@ -454,6 +664,30 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
             ledgerLines.addFirst(line);
             while (ledgerLines.size() > 12) ledgerLines.removeLast();
             if (ledgerText != null) ledgerText.setText(String.join("\n", ledgerLines));
+        });
+    }
+
+    @Override
+    public void onGateEvent(SessionStore.SourceEvent event) {
+        SessionStore.Session session = currentSession;
+        if (session != null) {
+            synchronized (session.events) {
+                session.events.add(event);
+            }
+        }
+
+        runOnUiThread(() -> {
+            String line = String.format(
+                Locale.US,
+                "%s  %s\n     %s  sensor:%d%%",
+                formatDuration(event.offsetMs),
+                event.label,
+                event.effect,
+                Math.round(event.sensorInfluence * 100)
+            );
+            ledgerLines.addFirst(line);
+            while (ledgerLines.size() > 10) ledgerLines.removeLast();
+            if (ledgerText != null) ledgerText.setText(String.join("\n\n", ledgerLines));
         });
     }
 
@@ -650,8 +884,8 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         addTitle(page, "Ech0Void Native V3");
 
         page.addView(card(
-            "THREE DISTINCT ENGINES",
-            "EchoBox uses recorded human micro-fragments with silence, overlap and decaying repeats. Field Drift breaks those recordings into reverse/rate-shifted clusters with gaps. Signal Scan emulates a ghost-box sweep using tiny recorded windows and short static gates, then pauses."
+            "PRIMARY: ECH0GATE",
+            "Ech0Gate is now the primary instrument: reversed, half-speed, shuffled wordless human banks run silently underneath a manual gate. You decide when audio is exposed. EchoBox, Field Drift and Signal Scan remain experimental secondary engines."
         ));
         page.addView(card(
             "NO AI SPIRIT WORDS",
@@ -693,6 +927,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         stopPlayback();
         mainHandler.removeCallbacksAndMessages(null);
         if (engine != null) engine.stop();
+        if (gateEngine != null) gateEngine.stop();
         if (sensors != null) sensors.stop();
         stopRoomRecorder();
         super.onDestroy();
