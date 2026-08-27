@@ -282,7 +282,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         page.addView(card(
             "HOW THIS SIGNAL IS BUILT",
-            "Human speech is reversed, played at roughly 50% speed, split into ~2-second wordless chunks and shuffled. The bank keeps moving underneath — but you hear NOTHING until you manually open the gate."
+            "Each preset is now a long pre-rendered wordless bank built from different public-domain source recordings. Speech is reversed, slowed, chopped and shuffled BEFORE it reaches the phone. The app simply runs the long bank silently underneath the gate."
         ), marginTop(8));
 
         TextView bankHead = text("VOICE BANK", 11, TEXT, true);
@@ -291,27 +291,20 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         Spinner bankSpinner = new Spinner(this);
         String[] bankLabels = new String[]{
-            "VOID MIX • 12 voices",
-            "Vox 01 • Clear",
-            "Vox 02 • Low",
-            "Vox 03 • Bright",
-            "Vox 04 • Dry",
-            "Vox 05 • Hollow",
-            "Vox 06 • Grain",
-            "Vox 07 • Airy",
-            "Vox 08 • Dark",
-            "Vox 09 • Neutral",
-            "Vox 10 • Narrow",
-            "Vox 11 • Soft",
-            "Vox 12 • Rough",
-            "Radio / Announcement"
+            "VOID MIX • all source families",
+            "STORY FIELD • multi-reader",
+            "DARK VOICE • long narrator",
+            "MULTI-VOICE • many readers",
+            "RADIO VOID • announcement",
+            "CROSSFEED • two source families"
         };
         String[] bankIds = new String[]{
             "voidmix",
-            "vox01", "vox02", "vox03", "vox04",
-            "vox05", "vox06", "vox07", "vox08",
-            "vox09", "vox10", "vox11", "vox12",
-            "radio"
+            "story",
+            "dark",
+            "multivoice",
+            "radio",
+            "crossfeed"
         };
         ArrayAdapter<String> bankAdapter = new ArrayAdapter<>(
             this,
@@ -336,8 +329,8 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         Button reshuffle = secondaryButton("RESHUFFLE HIDDEN BANK");
         reshuffle.setOnClickListener(v -> {
             if (gateEngine != null) {
-                gateEngine.setBank(selectedGateBank);
-                Toast.makeText(this, "Hidden wordless sequence reshuffled", Toast.LENGTH_SHORT).show();
+                gateEngine.reshufflePosition();
+                Toast.makeText(this, "Hidden bank jumped to a new position", Toast.LENGTH_SHORT).show();
             }
         });
         page.addView(reshuffle, marginTop(8));
@@ -398,7 +391,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         page.addView(card(
             "SENSOR BIAS",
-            "Sensor Bias never opens the gate by itself. At higher settings, phone sensor activity can alter which hidden chunk is under the gate when YOU open it. Set it to 0% for a purely manual control session."
+            "Sensor Bias never opens the gate by itself. At higher settings, phone sensor activity can jump the hidden long bank to another position when YOU open it. Set it to 0% for a purely manual control session."
         ), marginTop(10));
 
         TextView ledgerHead = text("GATE WINDOW LEDGER", 11, CYAN, true);
