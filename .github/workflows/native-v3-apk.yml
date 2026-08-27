@@ -12,7 +12,7 @@ permissions:
 jobs:
   native-v3-apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -28,6 +28,35 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+
+      - name: Prepare public-domain recorded source bank
+        run: |
+          set -euo pipefail
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+          RAW=nativeapp/app/src/main/res/raw
+          mkdir -p "$RAW"
+
+          curl -fL --retry 4 --retry-delay 2             "https://upload.wikimedia.org/wikipedia/commons/4/47/En-us-phoneme.ogg"             -o /tmp/voice_us.ogg
+
+          curl -fL --retry 4 --retry-delay 2             "https://upload.wikimedia.org/wikipedia/commons/5/56/En-uk-hear.ogg"             -o /tmp/voice_uk.ogg
+
+          curl -fL --retry 4 --retry-delay 2             "https://upload.wikimedia.org/wikipedia/commons/3/33/Ko-Daehan_Minguk-female.ogg"             -o /tmp/voice_female.ogg
+
+          curl -fL --retry 4 --retry-delay 2             "https://upload.wikimedia.org/wikipedia/commons/e/e9/Pl-prawie_si%C4%99_uda%C5%82o.ogg"             -o /tmp/voice_polish.ogg
+
+          curl -fL --retry 4 --retry-delay 2             "https://upload.wikimedia.org/wikipedia/commons/2/26/Ekb_Metro_voice_messages_sample_05-2019.ogg"             -o /tmp/voice_metro.ogg
+
+          ffmpeg -hide_banner -loglevel error -y -i /tmp/voice_us.ogg             -ar 11025 -ac 1 -c:a pcm_u8 "$RAW/voice_us.wav"
+          ffmpeg -hide_banner -loglevel error -y -i /tmp/voice_uk.ogg             -ar 11025 -ac 1 -c:a pcm_u8 "$RAW/voice_uk.wav"
+          ffmpeg -hide_banner -loglevel error -y -i /tmp/voice_female.ogg             -ar 11025 -ac 1 -c:a pcm_u8 "$RAW/voice_female.wav"
+          ffmpeg -hide_banner -loglevel error -y -i /tmp/voice_polish.ogg             -ar 11025 -ac 1 -c:a pcm_u8 "$RAW/voice_polish.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 0 -t 20 -i /tmp/voice_metro.ogg             -ar 11025 -ac 1 -c:a pcm_u8 "$RAW/voice_metro.wav"
+
+          ls -lh "$RAW"/voice_*.wav
 
       - name: Build native Android APK
         working-directory: nativeapp
