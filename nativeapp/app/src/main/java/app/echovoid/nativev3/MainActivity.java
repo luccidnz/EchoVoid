@@ -74,7 +74,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
     private float sensorMix = 0.55f;
     private float output = 0.68f;
     private float gateReverb = 0.42f;
-    private String selectedGateBank = "mixed";
+    private String selectedGateBank = "voidmix";
 
     private TextView activityValue;
     private TextView magneticValue;
@@ -291,13 +291,28 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         Spinner bankSpinner = new Spinner(this);
         String[] bankLabels = new String[]{
-            "Mixed Human",
-            "Male Blend",
-            "Female Voice",
-            "Foreign Blend",
+            "VOID MIX • 12 voices",
+            "Vox 01 • Clear",
+            "Vox 02 • Low",
+            "Vox 03 • Bright",
+            "Vox 04 • Dry",
+            "Vox 05 • Hollow",
+            "Vox 06 • Grain",
+            "Vox 07 • Airy",
+            "Vox 08 • Dark",
+            "Vox 09 • Neutral",
+            "Vox 10 • Narrow",
+            "Vox 11 • Soft",
+            "Vox 12 • Rough",
             "Radio / Announcement"
         };
-        String[] bankIds = new String[]{"mixed", "male", "female", "foreign", "radio"};
+        String[] bankIds = new String[]{
+            "voidmix",
+            "vox01", "vox02", "vox03", "vox04",
+            "vox05", "vox06", "vox07", "vox08",
+            "vox09", "vox10", "vox11", "vox12",
+            "radio"
+        };
         ArrayAdapter<String> bankAdapter = new ArrayAdapter<>(
             this,
             android.R.layout.simple_spinner_dropdown_item,
@@ -317,6 +332,15 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
             @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
         });
         page.addView(bankSpinner);
+
+        Button reshuffle = secondaryButton("RESHUFFLE HIDDEN BANK");
+        reshuffle.setOnClickListener(v -> {
+            if (gateEngine != null) {
+                gateEngine.setBank(selectedGateBank);
+                Toast.makeText(this, "Hidden wordless sequence reshuffled", Toast.LENGTH_SHORT).show();
+            }
+        });
+        page.addView(reshuffle, marginTop(8));
 
         addSlider(page, "REVERB / TAIL", gateReverb, v -> {
             gateReverb = v;
