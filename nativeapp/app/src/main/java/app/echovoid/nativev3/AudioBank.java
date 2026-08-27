@@ -5,9 +5,6 @@ import android.content.res.Resources;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public final class AudioBank {
     public static final class Source {
@@ -50,31 +47,6 @@ public final class AudioBank {
         }
     }
 
-    private final List<Source> sources = new ArrayList<>();
-    private final Random random = new Random();
-
-    public AudioBank(Context context) throws Exception {
-        Resources r = context.getResources();
-
-        sources.add(load(r, R.raw.vox_01, "vox01", "Vox 01 • Clear"));
-        sources.add(load(r, R.raw.vox_02, "vox02", "Vox 02 • Low"));
-        sources.add(load(r, R.raw.vox_03, "vox03", "Vox 03 • Bright"));
-        sources.add(load(r, R.raw.vox_04, "vox04", "Vox 04 • Dry"));
-        sources.add(load(r, R.raw.vox_05, "vox05", "Vox 05 • Hollow"));
-        sources.add(load(r, R.raw.vox_06, "vox06", "Vox 06 • Grain"));
-        sources.add(load(r, R.raw.vox_07, "vox07", "Vox 07 • Airy"));
-        sources.add(load(r, R.raw.vox_08, "vox08", "Vox 08 • Dark"));
-        sources.add(load(r, R.raw.vox_09, "vox09", "Vox 09 • Neutral"));
-        sources.add(load(r, R.raw.vox_10, "vox10", "Vox 10 • Narrow"));
-        sources.add(load(r, R.raw.vox_11, "vox11", "Vox 11 • Soft"));
-        sources.add(load(r, R.raw.vox_12, "vox12", "Vox 12 • Rough"));
-        sources.add(load(r, R.raw.voice_metro, "radio", "Radio / Announcement"));
-    }
-
-    public boolean isReady() {
-        return !sources.isEmpty();
-    }
-
     public static final class LongBank {
         public final String id;
         public final String label;
@@ -91,6 +63,16 @@ public final class AudioBank {
         public float durationSeconds() {
             return pcm.length / (float) sampleRate;
         }
+    }
+
+    private final Context context;
+
+    public AudioBank(Context context) {
+        this.context = context.getApplicationContext();
+    }
+
+    public boolean isReady() {
+        return true;
     }
 
     public String[] realBankIds() {
@@ -113,7 +95,7 @@ public final class AudioBank {
         return "VOID MIX • all source families";
     }
 
-    public LongBank loadRealBank(Context context, String id) throws Exception {
+    public LongBank loadRealBank(Context ignored, String id) throws Exception {
         Resources r = context.getResources();
         int resId;
         if ("story".equals(id)) resId = R.raw.bank_story;
@@ -127,47 +109,11 @@ public final class AudioBank {
         return new LongBank(id, realBankLabel(id), source.pcm, source.sampleRate);
     }
 
-    public String[] bankIds() {
-        return new String[]{
-            "voidmix",
-            "vox01", "vox02", "vox03", "vox04",
-            "vox05", "vox06", "vox07", "vox08",
-            "vox09", "vox10", "vox11", "vox12",
-            "radio"
-        };
-    }
-
-    public String bankLabel(String bankId) {
-        if ("voidmix".equals(bankId)) return "VOID MIX • 12 voices";
-        for (Source source : sources) {
-            if (source.id.equals(bankId)) return source.label;
-        }
-        return "VOID MIX • 12 voices";
-    }
-
-    public List<Source> sourcesForBank(String bankId) {
-        List<Source> result = new ArrayList<>();
-
-        if ("voidmix".equals(bankId)) {
-            for (Source source : sources) {
-                if (!"radio".equals(source.id)) result.add(source);
-            }
-            return result;
-        }
-
-        for (Source source : sources) {
-            if (source.id.equals(bankId)) {
-                result.add(source);
-                return result;
-            }
-        }
-
-        for (Source source : sources) {
-            if (!"radio".equals(source.id)) result.add(source);
-        }
-        return result;
-    }
-
+    /*
+     * Compatibility only for the experimental legacy engines. Ech0Gate no longer
+     * builds a bank from this API. Returning null prevents any accidental fallback
+     * to the old runtime micro-fragment architecture.
+     */
     public FragmentSpec pick(
         long seed,
         int minMs,
@@ -177,19 +123,7 @@ public final class AudioBank {
         boolean allowReverse,
         float gain
     ) {
-        if (sources.isEmpty()) return null;
-        random.setSeed(seed);
-
-        Source source = sources.get(random.nextInt(sources.size()));
-        int lengthMs = minMs + random.nextInt(Math.max(1, maxMs - minMs + 1));
-        int length = Math.max(24, Math.round(lengthMs * source.sampleRate / 1000f));
-        length = Math.min(length, Math.max(24, source.pcm.length - 1));
-
-        int start = chooseEnergeticStart(source, length, random);
-        float rate = minRate + random.nextFloat() * Math.max(0.01f, maxRate - minRate);
-        boolean reverse = allowReverse && random.nextBoolean();
-
-        return new FragmentSpec(source, start, length, rate, reverse, gain);
+        return null;
     }
 
     private static Source load(Resources resources, int id, String sourceId, String label) throws Exception {
@@ -210,32 +144,6 @@ public final class AudioBank {
             }
             return new Source(sourceId, label, pcm, parsed.sampleRate);
         }
-    }
-
-    private static int chooseEnergeticStart(Source source, int length, Random random) {
-        int maxStart = Math.max(0, source.pcm.length - length - 1);
-        if (maxStart <= 0) return 0;
-
-        int bestStart = random.nextInt(maxStart + 1);
-        double bestEnergy = -1;
-        int attempts = 18;
-
-        for (int a = 0; a < attempts; a++) {
-            int candidate = random.nextInt(maxStart + 1);
-            int stride = Math.max(1, length / 32);
-            double sum = 0;
-            int count = 0;
-            for (int i = candidate; i < candidate + length; i += stride) {
-                sum += Math.abs((int) source.pcm[i]);
-                count++;
-            }
-            double energy = count == 0 ? 0 : sum / count;
-            if (energy > bestEnergy) {
-                bestEnergy = energy;
-                bestStart = candidate;
-            }
-        }
-        return bestStart;
     }
 
     private static final class WavData {
