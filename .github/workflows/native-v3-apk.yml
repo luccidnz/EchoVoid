@@ -1,4 +1,4 @@
-name: Build Ech0Void Native V3 APK
+name: Build Ech0Void Real Banks APK
 
 on:
   push:
@@ -29,70 +29,53 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Prepare long-form public-domain voice banks
+      - name: Ensure FFmpeg
         run: |
-          set -euo pipefail
           if ! command -v ffmpeg >/dev/null 2>&1; then
             sudo apt-get update
             sudo apt-get install -y ffmpeg
           fi
 
-          RAW=nativeapp/app/src/main/res/raw
-          mkdir -p "$RAW"
-
-          BASE="https://archive.org/download/sonnet_130_librivox"
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_apc.ogg"    -o /tmp/vox01.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_ce.ogg"     -o /tmp/vox02.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_chip.ogg"   -o /tmp/vox03.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_db.ogg"     -o /tmp/vox04.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_dilini.ogg" -o /tmp/vox05.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_gw.ogg"     -o /tmp/vox06.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_jtm.ogg"    -o /tmp/vox07.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_kl.ogg"     -o /tmp/vox08.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_kmcq.ogg"   -o /tmp/vox09.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_ks.ogg"     -o /tmp/vox10.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_lf.ogg"     -o /tmp/vox11.ogg
-          curl -fL --retry 4 "$BASE/sonnet130_shakespeare_mac.ogg"    -o /tmp/vox12.ogg
-
-          curl -fL --retry 4             "https://upload.wikimedia.org/wikipedia/commons/2/26/Ekb_Metro_voice_messages_sample_05-2019.ogg"             -o /tmp/metro.ogg
-
-          # Trim intros, retain ~40 s per distinct human reader, and encode at
-          # 16 kHz / 16-bit mono. The old 11 kHz / 8-bit bank was intentionally
-          # tiny but sounded crunchy and made different presets collapse into
-          # the same warped texture.
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox01.ogg             -af "aresample=16000" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_01.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox02.ogg             -af "aresample=16000,lowpass=f=3000" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_02.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox03.ogg             -af "aresample=16000,highpass=f=320" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_03.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox04.ogg             -af "aresample=16000,highpass=f=160,lowpass=f=4200" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_04.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox05.ogg             -af "aresample=16000,lowpass=f=2200" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_05.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox06.ogg             -af "aresample=16000,highpass=f=480" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_06.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox07.ogg             -af "aresample=16000,equalizer=f=2600:t=q:w=1.2:g=4" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_07.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox08.ogg             -af "aresample=16000,asetrate=14500,aresample=16000,lowpass=f=3300" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_08.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox09.ogg             -af "aresample=16000" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_09.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox10.ogg             -af "aresample=16000,highpass=f=280,lowpass=f=2700" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_10.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox11.ogg             -af "aresample=16000,asetrate=17400,aresample=16000,highpass=f=220" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_11.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 5 -t 40 -i /tmp/vox12.ogg             -af "aresample=16000,highpass=f=110,lowpass=f=1900" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/vox_12.wav"
-
-          ffmpeg -hide_banner -loglevel error -y -ss 0 -t 25 -i /tmp/metro.ogg             -af "aresample=16000,highpass=f=300,lowpass=f=3400" -ar 16000 -ac 1 -c:a pcm_s16le "$RAW/voice_metro.wav"
-
-          echo "Prepared source banks:"
-          ls -lh "$RAW"/vox_*.wav "$RAW"/voice_metro.wav
-
       - name: Render real long wordless banks
         run: |
+          set -euo pipefail
           python3 nativeapp/tools/build_wordless_banks.py
+          echo "Rendered bank files:"
           ls -lh nativeapp/app/src/main/res/raw/bank_*.wav
+          echo "Bank manifest:"
+          cat nativeapp/app/src/main/res/raw/bank_manifest.json
+
+      - name: Validate banks are real and distinct
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, wave
+          from pathlib import Path
+
+          raw = Path("nativeapp/app/src/main/res/raw")
+          wavs = sorted(raw.glob("bank_*.wav"))
+          if len(wavs) != 6:
+              raise SystemExit(f"expected 6 banks, got {len(wavs)}")
+
+          hashes = {}
+          for path in wavs:
+              data = path.read_bytes()
+              h = hashlib.sha256(data).hexdigest()
+              with wave.open(str(path), "rb") as w:
+                  dur = w.getnframes() / w.getframerate()
+                  print(path.name, f"{dur:.1f}s", h[:16])
+                  if dur < 110:
+                      raise SystemExit(f"{path.name} is too short: {dur}")
+              if h in hashes:
+                  raise SystemExit(f"duplicate bank audio: {path.name} == {hashes[h]}")
+              hashes[h] = path.name
+
+          manifest = json.loads((raw / "bank_manifest.json").read_text())
+          for item in manifest:
+              if item["chunks"] < 55:
+                  raise SystemExit(f"too few chunks in {item['name']}")
+              if item["unique_source_count"] < 1:
+                  raise SystemExit(f"no source diversity in {item['name']}")
+          PY
 
       - name: Build native Android APK
         working-directory: nativeapp
@@ -100,16 +83,16 @@ jobs:
 
       - name: Prepare phone APK
         run: |
-          cp nativeapp/app/build/outputs/apk/debug/app-debug.apk Ech0Void-Native-V3-test.apk
-          ls -lh Ech0Void-Native-V3-test.apk
-          sha256sum Ech0Void-Native-V3-test.apk | tee Ech0Void-Native-V3-test.sha256
+          cp nativeapp/app/build/outputs/apk/debug/app-debug.apk Ech0Void-Real-Banks-test.apk
+          ls -lh Ech0Void-Real-Banks-test.apk
+          sha256sum Ech0Void-Real-Banks-test.apk | tee Ech0Void-Real-Banks-test.sha256
 
       - name: Upload phone APK
         uses: actions/upload-artifact@v4
         with:
-          name: Ech0Void-Native-V3-test
+          name: Ech0Void-Real-Banks-test
           path: |
-            Ech0Void-Native-V3-test.apk
-            Ech0Void-Native-V3-test.sha256
+            Ech0Void-Real-Banks-test.apk
+            Ech0Void-Real-Banks-test.sha256
           if-no-files-found: error
           retention-days: 14
