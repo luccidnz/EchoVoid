@@ -55,11 +55,24 @@ public final class AudioBank {
 
     public AudioBank(Context context) throws Exception {
         Resources r = context.getResources();
-        sources.add(load(r, R.raw.voice_us, "pd-us", "public-domain US voice"));
-        sources.add(load(r, R.raw.voice_uk, "pd-uk", "public-domain UK voice"));
-        sources.add(load(r, R.raw.voice_female, "pd-female", "public-domain female voice"));
-        sources.add(load(r, R.raw.voice_polish, "pd-polish", "public-domain Polish voice"));
-        sources.add(load(r, R.raw.voice_metro, "pd-metro", "public-domain radio/metro voice"));
+
+        // Each Vox bank is backed by a different long-form public-domain human
+        // recording. They are intentionally kept separate so selecting a bank
+        // produces a genuinely different human timbre rather than just a new
+        // random position inside the same tiny sample.
+        sources.add(load(r, R.raw.vox_01, "vox01", "Vox 01 • Clear"));
+        sources.add(load(r, R.raw.vox_02, "vox02", "Vox 02 • Low"));
+        sources.add(load(r, R.raw.vox_03, "vox03", "Vox 03 • Bright"));
+        sources.add(load(r, R.raw.vox_04, "vox04", "Vox 04 • Dry"));
+        sources.add(load(r, R.raw.vox_05, "vox05", "Vox 05 • Hollow"));
+        sources.add(load(r, R.raw.vox_06, "vox06", "Vox 06 • Grain"));
+        sources.add(load(r, R.raw.vox_07, "vox07", "Vox 07 • Airy"));
+        sources.add(load(r, R.raw.vox_08, "vox08", "Vox 08 • Dark"));
+        sources.add(load(r, R.raw.vox_09, "vox09", "Vox 09 • Neutral"));
+        sources.add(load(r, R.raw.vox_10, "vox10", "Vox 10 • Narrow"));
+        sources.add(load(r, R.raw.vox_11, "vox11", "Vox 11 • Soft"));
+        sources.add(load(r, R.raw.vox_12, "vox12", "Vox 12 • Rough"));
+        sources.add(load(r, R.raw.voice_metro, "radio", "Radio / Announcement"));
     }
 
     public boolean isReady() {
@@ -67,34 +80,42 @@ public final class AudioBank {
     }
 
     public String[] bankIds() {
-        return new String[]{"mixed", "male", "female", "foreign", "radio"};
+        return new String[]{
+            "voidmix",
+            "vox01", "vox02", "vox03", "vox04",
+            "vox05", "vox06", "vox07", "vox08",
+            "vox09", "vox10", "vox11", "vox12",
+            "radio"
+        };
     }
 
     public String bankLabel(String bankId) {
-        if ("male".equals(bankId)) return "Male Blend";
-        if ("female".equals(bankId)) return "Female Voice";
-        if ("foreign".equals(bankId)) return "Foreign Blend";
-        if ("radio".equals(bankId)) return "Radio / Announcement";
-        return "Mixed Human";
+        if ("voidmix".equals(bankId)) return "VOID MIX • 12 voices";
+        for (Source source : sources) {
+            if (source.id.equals(bankId)) return source.label;
+        }
+        return "VOID MIX • 12 voices";
     }
 
     public List<Source> sourcesForBank(String bankId) {
         List<Source> result = new ArrayList<>();
-        if (sources.isEmpty()) return result;
 
-        if ("male".equals(bankId)) {
-            result.add(sources.get(0));
-            result.add(sources.get(1));
-        } else if ("female".equals(bankId)) {
-            result.add(sources.get(2));
-        } else if ("foreign".equals(bankId)) {
-            result.add(sources.get(2));
-            result.add(sources.get(3));
-            result.add(sources.get(4));
-        } else if ("radio".equals(bankId)) {
-            result.add(sources.get(4));
-        } else {
-            result.addAll(sources);
+        if ("voidmix".equals(bankId)) {
+            for (Source source : sources) {
+                if (!"radio".equals(source.id)) result.add(source);
+            }
+            return result;
+        }
+
+        for (Source source : sources) {
+            if (source.id.equals(bankId)) {
+                result.add(source);
+                return result;
+            }
+        }
+
+        for (Source source : sources) {
+            if (!"radio".equals(source.id)) result.add(source);
         }
         return result;
     }
@@ -111,14 +132,7 @@ public final class AudioBank {
         if (sources.isEmpty()) return null;
         random.setSeed(seed);
 
-        Source source;
-        // The longer radio/announcement recording is useful but should not dominate.
-        if (random.nextFloat() < 0.42f) {
-            source = sources.get(sources.size() - 1);
-        } else {
-            source = sources.get(random.nextInt(Math.max(1, sources.size() - 1)));
-        }
-
+        Source source = sources.get(random.nextInt(sources.size()));
         int lengthMs = minMs + random.nextInt(Math.max(1, maxMs - minMs + 1));
         int length = Math.max(24, Math.round(lengthMs * source.sampleRate / 1000f));
         length = Math.min(length, Math.max(24, source.pcm.length - 1));
@@ -179,7 +193,7 @@ public final class AudioBank {
     }
 
     private static WavData parseWav(byte[] bytes) {
-        if (bytes.length < 44 || ascii(bytes, 0, 4).equals("RIFF") == false || ascii(bytes, 8, 4).equals("WAVE") == false) {
+        if (bytes.length < 44 || !ascii(bytes, 0, 4).equals("RIFF") || !ascii(bytes, 8, 4).equals("WAVE")) {
             throw new IllegalArgumentException("Invalid WAV source");
         }
 
