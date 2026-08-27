@@ -37,8 +37,8 @@ public final class WordlessGateEngine {
     private volatile float sensorMix = 0.0f;
     private volatile float sensorActivity;
     private volatile long sensorSeed = 1L;
-    private volatile String bankId = "mixed";
-    private volatile String bankLabel = "Mixed Human";
+    private volatile String bankId = "voidmix";
+    private volatile String bankLabel = "VOID MIX • 12 voices";
 
     private float gateCurrent;
     private boolean gateWasOpen;
@@ -58,7 +58,7 @@ public final class WordlessGateEngine {
     public WordlessGateEngine(Context context, Listener listener) throws Exception {
         this.bank = new AudioBank(context);
         this.listener = listener;
-        rebuildBank("mixed", 0x45434830564f4944L);
+        rebuildBank("voidmix", 0x45434830564f4944L);
         configureReverbBuffers();
     }
 
@@ -235,12 +235,11 @@ public final class WordlessGateEngine {
             int i1 = clamp(i0 - 1, min, max);
 
             double frac = Math.abs(sourcePosition - Math.floor(sourcePosition));
-            double a = (((chunk.source.pcm[i0] & 0xff) - 128) / 128.0);
-            double b = (((chunk.source.pcm[i1] & 0xff) - 128) / 128.0);
+            double a = chunk.source.pcm[i0] / 32768.0;
+            double b = chunk.source.pcm[i1] / 32768.0;
             localOutputSample++;
 
-            // Mild high-pass-ish difference removes some muddy DC/rumble from old voice files.
-            return (a + (b - a) * frac) * 0.92;
+            return (a + (b - a) * frac) * 0.96;
         }
     }
 
