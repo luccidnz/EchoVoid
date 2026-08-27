@@ -1,13 +1,14 @@
 package app.echovoid.nativev3;
 
+import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,19 +20,20 @@ public final class Ech0Engine {
         void onEngineError(String message);
     }
 
-    private static final int SAMPLE_RATE = 22050;
+    private static final int OUTPUT_RATE = 22050;
     private static final int FRAME = 512;
 
     private final Mode mode;
     private final Listener listener;
+    private final AudioBank bank;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<Voice> voices = new ArrayList<>();
     private final Random random = new Random();
 
-    private volatile float intensity = 0.62f;
-    private volatile float variation = 0.55f;
-    private volatile float texture = 0.55f;
-    private volatile float sensorMix = 0.45f;
+    private volatile float intensity = 0.45f;
+    private volatile float variation = 0.50f;
+    private volatile float texture = 0.45f;
+    private volatile float sensorMix = 0.50f;
     private volatile float output = 0.68f;
     private volatile float sensorActivity = 0f;
     private volatile long sensorSeed = 1L;
@@ -41,11 +43,11 @@ public final class Ech0Engine {
     private long sampleCursor;
     private long nextEventSample;
     private long sessionStartedAt;
-    private float noiseState;
 
-    public Ech0Engine(Mode mode, Listener listener) {
+    public Ech0Engine(Context context, Mode mode, Listener listener) throws Exception {
         this.mode = mode;
         this.listener = listener;
+        this.bank = new AudioBank(context);
     }
 
     public void setSettings(float intensity, float variation, float texture, float sensorMix, float output) {
@@ -62,13 +64,18 @@ public final class Ech0Engine {
     }
 
     public void start() {
+        if (!bank.isReady()) {
+            if (listener != null) listener.onEngineError("Recorded source bank is unavailable.");
+            return;
+        }
         if (!running.compareAndSet(false, true)) return;
+
         sessionStartedAt = System.currentTimeMillis();
         sampleCursor = 0;
-        nextEventSample = 0;
+        nextEventSample = msToOutputSamples(350);
 
         int minBuffer = AudioTrack.getMinBufferSize(
-            SAMPLE_RATE,
+            OUTPUT_RATE,
             AudioFormat.CHANNEL_OUT_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         );
@@ -78,10 +85,10 @@ public final class Ech0Engine {
             track = new AudioTrack.Builder()
                 .setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build())
                 .setAudioFormat(new AudioFormat.Builder()
-                    .setSampleRate(SAMPLE_RATE)
+                    .setSampleRate(OUTPUT_RATE)
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build())
@@ -91,13 +98,11 @@ public final class Ech0Engine {
             track.play();
         } catch (Exception e) {
             running.set(false);
-            if (listener != null) listener.onEngineError("AudioTrack failed: " + e.getMessage());
+            if (listener != null) listener.onEngineError("Audio output failed: " + e.getMessage());
             return;
         }
 
-        emitStaticBedIfNeeded();
-
-        worker = new Thread(this::renderLoop, "Ech0VoidAudio");
+        worker = new Thread(this::renderLoop, "Ech0VoidRecordedBankAudio");
         worker.setPriority(Thread.MAX_PRIORITY);
         worker.start();
     }
@@ -105,7 +110,7 @@ public final class Ech0Engine {
     public void stop() {
         running.set(false);
         if (worker != null) {
-            try { worker.join(800); } catch (InterruptedException ignored) {}
+            try { worker.join(900); } catch (InterruptedException ignored) {}
             worker = null;
         }
         if (track != null) {
@@ -122,25 +127,33 @@ public final class Ech0Engine {
 
     private void renderLoop() {
         short[] pcm = new short[FRAME];
+
         while (running.get()) {
             try {
-                if (sampleCursor >= nextEventSample) scheduleEvent();
+                if (sampleCursor >= nextEventSample) {
+                    scheduleCluster();
+                    nextEventSample = sampleCursor + calculateGapSamples();
+                }
 
                 for (int i = 0; i < FRAME; i++) {
-                    double mix = backgroundSample(sampleCursor + i);
+                    long absolute = sampleCursor + i;
+                    double mix = 0.0;
+
                     synchronized (voices) {
                         Iterator<Voice> it = voices.iterator();
                         while (it.hasNext()) {
-                            Voice v = it.next();
-                            long local = (sampleCursor + i) - v.startSample;
+                            Voice voice = it.next();
+                            long local = absolute - voice.startOutputSample;
                             if (local < 0) continue;
-                            if (local >= v.durationSamples) {
+                            if (local >= voice.durationOutputSamples) {
                                 it.remove();
                                 continue;
                             }
-                            mix += v.sample(local);
+                            mix += voice.sample(local);
                         }
                     }
+
+                    // Silence is intentionally the default state.
                     mix *= output;
                     mix = Math.max(-1.0, Math.min(1.0, mix));
                     pcm[i] = (short) Math.round(mix * 32767.0);
@@ -158,22 +171,37 @@ public final class Ech0Engine {
         }
     }
 
-    private double backgroundSample(long sample) {
-        if (mode != Mode.SIGNAL_SCAN) return 0.0;
-        double seconds = sample / (double) SAMPLE_RATE;
-        double gateSpeed = 5.0 + variation * 11.0;
-        double gate = Math.sin(seconds * Math.PI * 2.0 * gateSpeed) > (0.15 - texture * 0.5) ? 1.0 : 0.18;
-        double white = random.nextDouble() * 2.0 - 1.0;
-        noiseState = noiseState * 0.82f + (float) white * 0.18f;
-        double amount = 0.025 + texture * 0.12;
-        return noiseState * amount * gate;
+    private long calculateGapSamples() {
+        double baseMs;
+        switch (mode) {
+            case ECHO_BOX:
+                baseMs = lerp(5200, 1500, intensity);
+                break;
+            case FIELD_DRIFT:
+                baseMs = lerp(4000, 900, intensity);
+                break;
+            default:
+                baseMs = lerp(3200, 750, intensity);
+                break;
+        }
+
+        random.setSeed(sensorSeed ^ sampleCursor ^ 0x6a09e667f3bcc909L);
+        double jitter = 0.68 + random.nextDouble() * (0.72 + variation * 0.85);
+
+        // At high Sensor Mix, quiet sensor periods become quieter and sensor activity
+        // shortens the wait. The sensor never invents content; it only biases timing/choice.
+        double sensorGate = 1.0 + sensorMix * (0.85 - sensorActivity * 2.20);
+        sensorGate = Math.max(0.38, Math.min(2.0, sensorGate));
+
+        return msToOutputSamples((long) Math.max(260, baseMs * jitter * sensorGate));
     }
 
-    private void scheduleEvent() {
-        long seed = sensorSeed ^ sampleCursor ^ (long) (sensorActivity * 1_000_003);
-        random.setSeed(seed + random.nextLong());
+    private void scheduleCluster() {
+        long seed = sensorSeed ^ sampleCursor ^ ((long) (sensorActivity * 1_000_003f));
+        random.setSeed(seed + 0x9e3779b97f4a7c15L);
 
         float influence = clamp01(sensorActivity * sensorMix);
+
         if (mode == Mode.ECHO_BOX) {
             scheduleEchoBox(influence);
         } else if (mode == Mode.FIELD_DRIFT) {
@@ -181,91 +209,176 @@ public final class Ech0Engine {
         } else {
             scheduleSignalScan(influence);
         }
-
-        double baseMs;
-        if (mode == Mode.ECHO_BOX) baseMs = 1250 - intensity * 700;
-        else if (mode == Mode.FIELD_DRIFT) baseMs = 1050 - intensity * 650;
-        else baseMs = 820 - intensity * 500;
-
-        double jitter = 0.55 + random.nextDouble() * (0.8 + variation * 1.2);
-        double sensorAcceleration = 1.0 - influence * 0.45;
-        long wait = (long) ((baseMs * jitter * sensorAcceleration) * SAMPLE_RATE / 1000.0);
-        nextEventSample = sampleCursor + Math.max(SAMPLE_RATE / 10, wait);
     }
 
     private void scheduleEchoBox(float influence) {
-        int vowel = random.nextInt(5);
-        String label = "vowel-" + "aeiou".charAt(vowel);
-        double rate = 0.78 + random.nextDouble() * (0.35 + variation * 0.35);
-        long dur = msToSamples((long) (280 + random.nextDouble() * 360));
-        float amp = 0.20f + intensity * 0.25f;
-        long base = sampleCursor + msToSamples((long) (random.nextDouble() * 90));
+        float baseGain = 0.34f + intensity * 0.24f;
+        AudioBank.FragmentSpec fragment = bank.pick(
+            random.nextLong() ^ sensorSeed,
+            85,
+            210,
+            0.86f,
+            1.14f + variation * 0.16f,
+            false,
+            baseGain
+        );
+        if (fragment == null) return;
 
-        addVoice(Voice.vowel(base, dur, 155 + vowel * 27, amp, rate, false, texture), "voice-like", label, "primary", (float) rate, amp, influence);
-        addVoice(Voice.vowel(base + msToSamples(115), dur, 155 + vowel * 27, amp * 0.52f, rate * 0.985, false, texture), "voice-like", label, "echo-1", (float) rate, amp * 0.52f, influence);
-        if (intensity > 0.45f) {
-            addVoice(Voice.vowel(base + msToSamples(245), dur, 155 + vowel * 27, amp * 0.30f, rate * 1.015, false, texture), "voice-like", label, "echo-2", (float) rate, amp * 0.30f, influence);
+        long start = sampleCursor + msToOutputSamples(10 + random.nextInt(90));
+        addFragment(fragment, start, "primary");
+
+        // Echoes repeat the exact recorded micro-fragment. They do not generate a new tone.
+        if (intensity > 0.16f) {
+            long echo1 = start + msToOutputSamples(145 + random.nextInt(120));
+            addFragment(copyWithGain(fragment, fragment.gain * 0.48f), echo1, "echo-1");
         }
-        if (texture > 0.65f && random.nextFloat() < texture * 0.45f) {
-            long breathDur = msToSamples(220 + random.nextInt(320));
-            addVoice(Voice.breath(base + msToSamples(45), breathDur, 0.10f + texture * 0.13f, false), "breath", "breath-fragment", "layer", 1f, 0.16f, influence);
+        if (intensity > 0.62f && random.nextFloat() < intensity) {
+            long echo2 = start + msToOutputSamples(340 + random.nextInt(170));
+            addFragment(copyWithGain(fragment, fragment.gain * 0.25f), echo2, "echo-2");
+        }
+
+        // Dense settings may briefly overlap a different human slice, but silence remains
+        // between clusters.
+        if (intensity > 0.70f && random.nextFloat() < 0.42f) {
+            AudioBank.FragmentSpec second = bank.pick(
+                random.nextLong(),
+                70,
+                160,
+                0.90f,
+                1.18f,
+                false,
+                baseGain * 0.62f
+            );
+            if (second != null) addFragment(second, start + msToOutputSamples(35 + random.nextInt(110)), "overlap");
         }
     }
 
     private void scheduleFieldDrift(float influence) {
-        if (random.nextFloat() < 0.10f + variation * 0.16f) {
-            emitEvent("silence-gate", "gate", "dropout", "drift-mute", 1f, 0f, influence);
-            return;
-        }
+        int count = 1 + (int) Math.floor(intensity * 3.0f);
+        if (random.nextFloat() < 0.28f + variation * 0.30f) count++;
 
-        boolean reverse = random.nextFloat() < (0.28f + variation * 0.42f);
-        boolean breath = random.nextFloat() < 0.22f;
-        double rate = 0.52 + random.nextDouble() * (0.75 + variation * 0.9);
-        long dur = msToSamples(180 + random.nextInt(520));
-        float amp = 0.18f + intensity * 0.30f;
-        long start = sampleCursor + msToSamples(random.nextInt(120));
+        long cursor = sampleCursor + msToOutputSamples(15 + random.nextInt(120));
+        for (int i = 0; i < count; i++) {
+            // Deliberate holes inside a cluster.
+            if (random.nextFloat() < 0.18f + variation * 0.16f) {
+                emitSilenceEvent(cursor, 80 + random.nextInt(220), influence);
+                cursor += msToOutputSamples(120 + random.nextInt(260));
+                continue;
+            }
 
-        if (breath) {
-            addVoice(Voice.breath(start, dur, amp * 0.75f, reverse), "breath", reverse ? "reverse-breath" : "breath-fragment", reverse ? "reverse" : "drift", (float) rate, amp, influence);
-        } else {
-            int vowel = random.nextInt(5);
-            String label = (reverse ? "reverse-" : "") + "vowel-" + "aeiou".charAt(vowel);
-            addVoice(Voice.vowel(start, dur, 125 + vowel * 32, amp, rate, reverse, texture), "voice-like", label, reverse ? "reverse-drift" : "rate-drift", (float) rate, amp, influence);
+            boolean reverse = random.nextFloat() < 0.64f;
+            float minRate = 0.58f;
+            float maxRate = 1.18f + variation * 0.82f;
+            float gain = 0.28f + intensity * 0.28f;
+
+            AudioBank.FragmentSpec fragment = bank.pick(
+                random.nextLong() ^ sensorSeed,
+                65,
+                190,
+                minRate,
+                maxRate,
+                reverse,
+                gain
+            );
+
+            if (fragment != null) {
+                addFragment(fragment, cursor, fragment.reverse ? "reverse-drift" : "rate-drift");
+            }
+
+            cursor += msToOutputSamples(75 + random.nextInt(150 + Math.round(variation * 220)));
         }
     }
 
     private void scheduleSignalScan(float influence) {
-        if (random.nextFloat() < 0.72f) {
-            double startHz = 320 + random.nextDouble() * 2100;
-            double endHz = 180 + random.nextDouble() * 4200;
-            long dur = msToSamples(80 + random.nextInt(260));
-            float amp = 0.08f + texture * 0.16f;
-            addVoice(Voice.chirp(sampleCursor, dur, startHz, endHz, amp), "scan", "scan-chirp", "frequency-sweep", 1f, amp, influence);
-        }
+        int steps = 4 + Math.round(intensity * 8f);
+        long stepGapMs = Math.round(lerp(135, 58, variation));
+        long cursor = sampleCursor + msToOutputSamples(10);
 
-        if (random.nextFloat() < 0.17f + intensity * 0.22f) {
-            int vowel = random.nextInt(5);
-            long dur = msToSamples(100 + random.nextInt(240));
-            float amp = 0.11f + intensity * 0.18f;
-            double rate = 0.75 + random.nextDouble() * 0.8;
-            addVoice(Voice.vowel(sampleCursor + msToSamples(30), dur, 170 + vowel * 35, amp, rate, random.nextBoolean(), texture), "voice-like", "sparse-vowel-" + "aeiou".charAt(vowel), "scan-gate", (float) rate, amp, influence);
+        for (int i = 0; i < steps; i++) {
+            // A ghost-box-style scan is a sequence of very short gated windows, followed
+            // by a real pause before the next sweep. It is not a continuous noise bed.
+            boolean staticStep = random.nextFloat() < (0.12f + texture * 0.34f);
+
+            if (staticStep) {
+                int ms = 28 + random.nextInt(55);
+                float gain = 0.05f + texture * 0.13f;
+                addNoiseBurst(cursor, ms, gain, influence);
+            } else {
+                int maxMs = 70 + Math.round((1f - variation) * 45f);
+                AudioBank.FragmentSpec fragment = bank.pick(
+                    random.nextLong() ^ (sensorSeed + i * 131L),
+                    35,
+                    Math.max(55, maxMs),
+                    0.78f,
+                    1.22f + variation * 0.65f,
+                    random.nextFloat() < 0.18f,
+                    0.20f + intensity * 0.20f
+                );
+                if (fragment != null) addFragment(fragment, cursor, "scan-window");
+            }
+
+            cursor += msToOutputSamples(stepGapMs + random.nextInt(35));
         }
     }
 
-    private void emitStaticBedIfNeeded() {
-        if (mode == Mode.SIGNAL_SCAN) {
-            emitEvent("static-bed", "static", "procedural-static", "continuous-gated-bed", 1f, 0.12f, 0f);
-        }
-    }
-
-    private void addVoice(Voice voice, String family, String label, String effect, float rate, float volume, float influence) {
+    private void addFragment(AudioBank.FragmentSpec spec, long start, String effect) {
+        SourceVoice voice = new SourceVoice(start, spec);
         synchronized (voices) {
             voices.add(voice);
         }
-        emitEvent("src-" + Long.toHexString(sampleCursor) + "-" + Integer.toHexString(random.nextInt()), family, label, effect, rate, volume, influence);
+
+        String sourceId = spec.source.id + "@" + spec.startMs() + "+" + spec.lengthMs();
+        String label = spec.source.label + " slice";
+        emitEvent(
+            sourceId,
+            "recorded-fragment",
+            label,
+            effect + (spec.reverse ? "/reverse" : ""),
+            spec.rate,
+            spec.gain,
+            clamp01(sensorActivity * sensorMix)
+        );
     }
 
-    private void emitEvent(String sourceId, String family, String label, String effect, float rate, float volume, float influence) {
+    private void addNoiseBurst(long start, int durationMs, float gain, float influence) {
+        synchronized (voices) {
+            voices.add(new NoiseBurst(start, msToOutputSamples(durationMs), gain, random.nextLong()));
+        }
+        emitEvent(
+            "generated-static@" + (System.currentTimeMillis() - sessionStartedAt),
+            "static",
+            "short static gate",
+            "scan-static-window",
+            1f,
+            gain,
+            influence
+        );
+    }
+
+    private void emitSilenceEvent(long start, int durationMs, float influence) {
+        long atMs = Math.max(0, Math.round(start * 1000f / OUTPUT_RATE));
+        if (listener == null) return;
+        SessionStore.SourceEvent event = new SessionStore.SourceEvent();
+        event.offsetMs = atMs;
+        event.sourceId = "silence-gap";
+        event.family = "gate";
+        event.label = "deliberate dropout";
+        event.effect = "mute-window";
+        event.rate = 1f;
+        event.volume = 0f;
+        event.sensorInfluence = influence;
+        listener.onSourceEvent(event);
+    }
+
+    private void emitEvent(
+        String sourceId,
+        String family,
+        String label,
+        String effect,
+        float rate,
+        float volume,
+        float influence
+    ) {
         if (listener == null) return;
         SessionStore.SourceEvent event = new SessionStore.SourceEvent();
         event.offsetMs = Math.max(0, System.currentTimeMillis() - sessionStartedAt);
@@ -279,81 +392,100 @@ public final class Ech0Engine {
         listener.onSourceEvent(event);
     }
 
-    private static long msToSamples(long ms) {
-        return Math.max(1, ms * SAMPLE_RATE / 1000L);
+    private static AudioBank.FragmentSpec copyWithGain(AudioBank.FragmentSpec src, float gain) {
+        return new AudioBank.FragmentSpec(src.source, src.start, src.length, src.rate, src.reverse, gain);
+    }
+
+    private static long msToOutputSamples(long ms) {
+        return Math.max(1, ms * OUTPUT_RATE / 1000L);
+    }
+
+    private static double lerp(double from, double to, double t) {
+        return from + (to - from) * Math.max(0.0, Math.min(1.0, t));
     }
 
     private static float clamp01(float x) {
         return Math.max(0f, Math.min(1f, x));
     }
 
-    private static final class Voice {
-        final int kind;
-        final long startSample;
-        final long durationSamples;
-        final double freqA;
-        final double freqB;
-        final double amplitude;
-        final double rate;
-        final boolean reverse;
-        final double texture;
-        double phase;
-        final Random noise = new Random();
+    private abstract static class Voice {
+        final long startOutputSample;
+        final long durationOutputSamples;
 
-        private Voice(int kind, long startSample, long durationSamples, double freqA, double freqB, double amplitude, double rate, boolean reverse, double texture) {
-            this.kind = kind;
-            this.startSample = startSample;
-            this.durationSamples = durationSamples;
-            this.freqA = freqA;
-            this.freqB = freqB;
-            this.amplitude = amplitude;
-            this.rate = rate;
-            this.reverse = reverse;
-            this.texture = texture;
+        Voice(long startOutputSample, long durationOutputSamples) {
+            this.startOutputSample = startOutputSample;
+            this.durationOutputSamples = durationOutputSamples;
         }
 
-        static Voice vowel(long start, long dur, double freq, double amp, double rate, boolean reverse, double texture) {
-            return new Voice(0, start, dur, freq, freq, amp, rate, reverse, texture);
+        abstract double sample(long localOutputSample);
+
+        double envelope(long local) {
+            double p = local / (double) Math.max(1, durationOutputSamples - 1);
+            double fade = Math.min(0.22, 0.025 + 400.0 / Math.max(4000.0, durationOutputSamples));
+            if (p < fade) return p / fade;
+            if (p > 1.0 - fade) return (1.0 - p) / fade;
+            return 1.0;
+        }
+    }
+
+    private static final class SourceVoice extends Voice {
+        final AudioBank.FragmentSpec spec;
+        final double sourcePerOutput;
+
+        SourceVoice(long startOutputSample, AudioBank.FragmentSpec spec) {
+            super(
+                startOutputSample,
+                Math.max(
+                    1,
+                    Math.round(
+                        spec.length * (OUTPUT_RATE / (double) spec.source.sampleRate) / Math.max(0.25, spec.rate)
+                    )
+                )
+            );
+            this.spec = spec;
+            this.sourcePerOutput = (spec.source.sampleRate / (double) OUTPUT_RATE) * spec.rate;
         }
 
-        static Voice breath(long start, long dur, double amp, boolean reverse) {
-            return new Voice(1, start, dur, 0, 0, amp, 1, reverse, 0.5);
+        @Override
+        double sample(long localOutputSample) {
+            double rel = localOutputSample * sourcePerOutput;
+            double src;
+            if (spec.reverse) src = spec.start + spec.length - 1 - rel;
+            else src = spec.start + rel;
+
+            int i0 = (int) Math.floor(src);
+            int i1 = i0 + (spec.reverse ? -1 : 1);
+
+            int min = spec.start;
+            int max = spec.start + spec.length - 1;
+            i0 = Math.max(min, Math.min(max, i0));
+            i1 = Math.max(min, Math.min(max, i1));
+
+            double frac = Math.abs(src - Math.floor(src));
+            double a = (((spec.source.pcm[i0] & 0xff) - 128) / 128.0);
+            double b = (((spec.source.pcm[i1] & 0xff) - 128) / 128.0);
+            double value = a + (b - a) * frac;
+
+            return value * spec.gain * envelope(localOutputSample);
+        }
+    }
+
+    private static final class NoiseBurst extends Voice {
+        final float gain;
+        final Random random;
+        double filtered;
+
+        NoiseBurst(long start, long duration, float gain, long seed) {
+            super(start, duration);
+            this.gain = gain;
+            this.random = new Random(seed);
         }
 
-        static Voice chirp(long start, long dur, double fromHz, double toHz, double amp) {
-            return new Voice(2, start, dur, fromHz, toHz, amp, 1, false, 0.5);
-        }
-
+        @Override
         double sample(long local) {
-            double p = local / (double) Math.max(1, durationSamples - 1);
-            double env;
-            if (reverse) {
-                env = Math.pow(p, 0.42) * Math.pow(1.0 - p, 2.9);
-            } else {
-                env = Math.pow(Math.max(0, Math.sin(Math.PI * p)), 0.72);
-            }
-
-            if (kind == 1) {
-                double n = noise.nextDouble() * 2.0 - 1.0;
-                return n * amplitude * env;
-            }
-
-            if (kind == 2) {
-                double hz = freqA + (freqB - freqA) * p;
-                phase += Math.PI * 2.0 * hz / SAMPLE_RATE;
-                return Math.sin(phase) * amplitude * env;
-            }
-
-            double base = freqA * rate;
-            double f1 = base * (3.0 + texture * 0.8);
-            double f2 = base * (5.2 + texture * 1.6);
-            double f3 = base * (8.0 + texture * 2.2);
-            phase += Math.PI * 2.0 * base / SAMPLE_RATE;
-            double s = Math.sin(phase) * 0.34
-                + Math.sin(phase * (f1 / base)) * 0.40
-                + Math.sin(phase * (f2 / base)) * 0.18
-                + Math.sin(phase * (f3 / base)) * 0.08;
-            return s * amplitude * env;
+            double white = random.nextDouble() * 2.0 - 1.0;
+            filtered = filtered * 0.58 + white * 0.42;
+            return filtered * gain * envelope(local);
         }
     }
 }
