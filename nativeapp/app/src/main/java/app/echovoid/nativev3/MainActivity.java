@@ -65,10 +65,10 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
     private long sensorSamples;
     private float peakActivity;
 
-    private float intensity = 0.62f;
-    private float variation = 0.55f;
-    private float texture = 0.55f;
-    private float sensorMix = 0.45f;
+    private float intensity = 0.40f;
+    private float variation = 0.52f;
+    private float texture = 0.38f;
+    private float sensorMix = 0.55f;
     private float output = 0.68f;
 
     private TextView activityValue;
@@ -144,21 +144,21 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         page.addView(modeCard(
             "ECHOBOX",
-            "Dense voice-like procedural fragments with decaying echo layers.",
+            "Short recorded human micro-fragments with silence, overlap and decaying repeats.",
             CYAN,
             () -> startSession(Ech0Engine.Mode.ECHO_BOX)
         ), marginTop(18));
 
         page.addView(modeCard(
             "FIELD DRIFT",
-            "Rate jumps, reverse envelopes, dropouts and unstable fragment movement.",
+            "Recorded micro-fragments broken into reverse jumps, rate drift, gaps and dropouts.",
             VIOLET,
             () -> startSession(Ech0Engine.Mode.FIELD_DRIFT)
         ), marginTop(10));
 
         page.addView(modeCard(
             "SIGNAL SCAN",
-            "Gated static bed, scan chirps and sparse generated fragments.",
+            "Ghost-box-style scan windows: short recorded voice slices, static gates and real pauses.",
             AMBER,
             () -> startSession(Ech0Engine.Mode.SIGNAL_SCAN)
         ), marginTop(10));
@@ -217,16 +217,22 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         showTransmission(mode);
 
         sensors.start();
-        engine = new Ech0Engine(mode, this);
-        engine.setSettings(intensity, variation, texture, sensorMix, output);
-        engine.updateSensor(currentActivity, currentSeed);
-        engine.start();
+        try {
+            engine = new Ech0Engine(this, mode, this);
+            engine.setSettings(intensity, variation, texture, sensorMix, output);
+            engine.updateSensor(currentActivity, currentSeed);
+            engine.start();
+        } catch (Exception e) {
+            engine = null;
+            setStatus("Recorded source bank failed to load", DANGER);
+            Toast.makeText(this, "Audio bank error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
 
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             startRoomRecorder();
         } else {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, MIC_REQUEST);
-            setStatus("Generated channel active • mic permission requested", AMBER);
+            setStatus("ITC output active • mic permission requested", AMBER);
         }
 
         mainHandler.removeCallbacks(tick);
@@ -257,7 +263,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         page.addView(card(
             "SOURCE PROVENANCE",
-            "Everything emitted by Ech0Void is GENERATED. The room microphone is a separate recording path. Generated events are timestamped below."
+            "Everything heard from the Ech0Void output is APP-SOURCED and timestamped below. Voice texture comes from chopped public-domain recordings; static is generated. The room microphone remains a separate recording path."
         ), marginTop(8));
 
         addSlider(page, "INTENSITY", intensity, v -> { intensity = v; pushSettings(); });
@@ -266,11 +272,11 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
         addSlider(page, "SENSOR MIX", sensorMix, v -> { sensorMix = v; pushSettings(); });
         addSlider(page, "OUTPUT", output, v -> { output = v; pushSettings(); });
 
-        TextView ledgerHead = text("GENERATED SOURCE LEDGER", 11, CYAN, true);
+        TextView ledgerHead = text("APP-SOURCED LEDGER", 11, CYAN, true);
         ledgerHead.setPadding(0, dp(18), 0, dp(8));
         page.addView(ledgerHead);
 
-        ledgerText = text("Waiting for generated source events…", 11, MUTED, false);
+        ledgerText = text("Listening… silence is part of the instrument.", 11, MUTED, false);
         ledgerText.setTypeface(Typeface.MONOSPACE);
         ledgerText.setPadding(dp(14), dp(14), dp(14), dp(14));
         ledgerText.setBackground(panelDrawable());
@@ -336,13 +342,13 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
             recorder.prepare();
             recorder.start();
             currentSession.roomAudioPath = out.getAbsolutePath();
-            setStatus("Generated channel + room capture active", GREEN);
+            setStatus("ITC output + room capture active", GREEN);
         } catch (Exception e) {
             try { if (recorder != null) recorder.release(); } catch (Exception ignored) {}
             recorder = null;
             currentSession.roomAudioPath = null;
             out.delete();
-            setStatus("Generated channel active • room mic unavailable", AMBER);
+            setStatus("ITC output active • room mic unavailable", AMBER);
         }
     }
 
@@ -522,7 +528,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         page.addView(card(
             "PROVENANCE",
-            "All source-ledger entries below were generated by Ech0Void. Room audio is a separate microphone recording and can include speaker bleed."
+            "All source-ledger entries below came from Ech0Void's own recorded-source bank or short generated static gates. Room audio is a separate microphone recording and can include speaker bleed."
         ), marginTop(10));
 
         if (hasRoomAudio(session)) {
@@ -645,7 +651,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
 
         page.addView(card(
             "THREE DISTINCT ENGINES",
-            "EchoBox layers voice-like procedural fragments and decays. Field Drift uses reverse envelopes, rate changes and dropouts. Signal Scan creates gated procedural static, scan tones and sparse fragments."
+            "EchoBox uses recorded human micro-fragments with silence, overlap and decaying repeats. Field Drift breaks those recordings into reverse/rate-shifted clusters with gaps. Signal Scan emulates a ghost-box sweep using tiny recorded windows and short static gates, then pauses."
         ));
         page.addView(card(
             "NO AI SPIRIT WORDS",
@@ -677,7 +683,7 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startRoomRecorder();
             } else {
-                setStatus("Generated channel active • room mic denied", AMBER);
+                setStatus("ITC output active • room mic denied", AMBER);
             }
         }
     }
