@@ -13,10 +13,10 @@ public final class AudioBank {
     public static final class Source {
         public final String id;
         public final String label;
-        public final byte[] pcm;
+        public final short[] pcm;
         public final int sampleRate;
 
-        Source(String id, String label, byte[] pcm, int sampleRate) {
+        Source(String id, String label, short[] pcm, int sampleRate) {
             this.id = id;
             this.label = label;
             this.pcm = pcm;
@@ -56,10 +56,6 @@ public final class AudioBank {
     public AudioBank(Context context) throws Exception {
         Resources r = context.getResources();
 
-        // Each Vox bank is backed by a different long-form public-domain human
-        // recording. They are intentionally kept separate so selecting a bank
-        // produces a genuinely different human timbre rather than just a new
-        // random position inside the same tiny sample.
         sources.add(load(r, R.raw.vox_01, "vox01", "Vox 01 • Clear"));
         sources.add(load(r, R.raw.vox_02, "vox02", "Vox 02 • Low"));
         sources.add(load(r, R.raw.vox_03, "vox03", "Vox 03 • Bright"));
@@ -148,11 +144,18 @@ public final class AudioBank {
         try (InputStream in = resources.openRawResource(id)) {
             byte[] wav = readAll(in);
             WavData parsed = parseWav(wav);
-            if (parsed.bitsPerSample != 8 || parsed.channels != 1) {
-                throw new IllegalStateException(label + " must be mono unsigned 8-bit PCM");
+            if (parsed.bitsPerSample != 16 || parsed.channels != 1) {
+                throw new IllegalStateException(label + " must be mono signed 16-bit PCM");
             }
-            byte[] pcm = new byte[parsed.dataLength];
-            System.arraycopy(wav, parsed.dataOffset, pcm, 0, parsed.dataLength);
+
+            int samples = parsed.dataLength / 2;
+            short[] pcm = new short[samples];
+            int src = parsed.dataOffset;
+            for (int i = 0; i < samples; i++, src += 2) {
+                int lo = wav[src] & 0xff;
+                int hi = wav[src + 1];
+                pcm[i] = (short) (lo | (hi << 8));
+            }
             return new Source(sourceId, label, pcm, parsed.sampleRate);
         }
     }
@@ -171,8 +174,7 @@ public final class AudioBank {
             double sum = 0;
             int count = 0;
             for (int i = candidate; i < candidate + length; i += stride) {
-                int centered = (source.pcm[i] & 0xff) - 128;
-                sum += Math.abs(centered);
+                sum += Math.abs((int) source.pcm[i]);
                 count++;
             }
             double energy = count == 0 ? 0 : sum / count;
