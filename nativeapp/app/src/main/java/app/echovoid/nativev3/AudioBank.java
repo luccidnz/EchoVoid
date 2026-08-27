@@ -75,6 +75,58 @@ public final class AudioBank {
         return !sources.isEmpty();
     }
 
+    public static final class LongBank {
+        public final String id;
+        public final String label;
+        public final short[] pcm;
+        public final int sampleRate;
+
+        LongBank(String id, String label, short[] pcm, int sampleRate) {
+            this.id = id;
+            this.label = label;
+            this.pcm = pcm;
+            this.sampleRate = sampleRate;
+        }
+
+        public float durationSeconds() {
+            return pcm.length / (float) sampleRate;
+        }
+    }
+
+    public String[] realBankIds() {
+        return new String[]{
+            "voidmix",
+            "story",
+            "dark",
+            "multivoice",
+            "radio",
+            "crossfeed"
+        };
+    }
+
+    public String realBankLabel(String id) {
+        if ("story".equals(id)) return "STORY FIELD • multi-reader";
+        if ("dark".equals(id)) return "DARK VOICE • long narrator";
+        if ("multivoice".equals(id)) return "MULTI-VOICE • many readers";
+        if ("radio".equals(id)) return "RADIO VOID • announcement";
+        if ("crossfeed".equals(id)) return "CROSSFEED • two source families";
+        return "VOID MIX • all source families";
+    }
+
+    public LongBank loadRealBank(Context context, String id) throws Exception {
+        Resources r = context.getResources();
+        int resId;
+        if ("story".equals(id)) resId = R.raw.bank_story;
+        else if ("dark".equals(id)) resId = R.raw.bank_dark;
+        else if ("multivoice".equals(id)) resId = R.raw.bank_multivoice;
+        else if ("radio".equals(id)) resId = R.raw.bank_radio;
+        else if ("crossfeed".equals(id)) resId = R.raw.bank_crossfeed;
+        else resId = R.raw.bank_voidmix;
+
+        Source source = load(r, resId, id, realBankLabel(id));
+        return new LongBank(id, realBankLabel(id), source.pcm, source.sampleRate);
+    }
+
     public String[] bankIds() {
         return new String[]{
             "voidmix",
