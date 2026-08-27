@@ -1,49 +1,46 @@
-# Ech0Void Native V3 — Recorded Source Bank
+# Ech0Void Native V3 — Wordless Source Bank
 
-The V3 ITC engine does **not** synthesize fake voice-like oscillator tones.
+## Why the bank changed
 
-Its vocal texture is built from public-domain human recordings that are converted to mono PCM during the Android CI build, then chopped at runtime into short non-semantic windows. Ech0Void never plays the source recordings as intact phrases in the live ITC path.
+The first Ech0Gate prototype used a handful of tiny public-domain voice samples. That proved the manual gate model, but the banks were too short and too similar: they repeated quickly and collapsed into the same crunchy/warped timbre.
 
-## Sources
+V3.2 fixes the bank architecture itself.
 
-All five sources below are public-domain releases on Wikimedia Commons:
+## HSB research model
 
-1. **US male voice**
-   - File: En-us-phoneme.ogg
-   - Author: DroEsperanto
-   - Public domain / own work released into the public domain
-   - https://commons.wikimedia.org/wiki/File:En-us-phoneme.ogg
+Joshua Louis publicly describes the HSB source method as human speech that is:
 
-2. **UK male voice**
-   - File: En-uk-hear.ogg
-   - Author: Chris Melville
-   - Public domain
-   - https://commons.wikimedia.org/wiki/File:En-uk-hear.ogg
+1. reversed,
+2. slowed by roughly 50%,
+3. chopped into small approximately two-second increments,
+4. randomly rearranged into wordless/gibberish human sound.
 
-3. **Female Korean voice**
-   - File: Ko-Daehan Minguk-female.ogg
-   - Author: Yuyudevil
-   - Public domain
-   - https://commons.wikimedia.org/wiki/File:Ko-Daehan_Minguk-female.ogg
+The Ech0Gate engine follows that broad, non-proprietary signal principle while adding transparent source provenance and separate room capture.
 
-4. **Polish voice**
-   - File: Pl-prawie się udało.ogg
-   - Author: Maciej Katafiasz / Mathrick
-   - Public domain
-   - https://commons.wikimedia.org/wiki/File:Pl-prawie_si%C4%99_uda%C5%82o.ogg
+## V3.2 bank design
 
-5. **Russian + English metro announcement texture**
-   - File: Ekb Metro voice messages sample 05-2019.ogg
-   - Author: A.Savin
-   - Public domain
-   - https://commons.wikimedia.org/wiki/File:Ekb_Metro_voice_messages_sample_05-2019.ogg
+- 12 genuinely different long-form human readers
+- approximately 40 seconds of source material per Vox bank before runtime reversal/half-speed processing
+- one independent source pool per Vox preset
+- a VOID MIX bank combining all 12 readers
+- a separate radio/announcement texture bank
+- 16 kHz / 16-bit mono PCM instead of the earlier 11.025 kHz / 8-bit PCM
+- ~1 second source chunks become ~2 second output chunks at half speed
+- shuffled without immediate recycling; a single Vox bank must traverse its full chunk list before reshuffling
+- the hidden bank keeps advancing while the manual gate is closed
 
-## Runtime rules
+That means a user opening the gate intermittently should not keep landing on the same tiny warped syllable.
 
-- Voice windows are normally only **35–210 ms** long.
-- EchoBox repeats/overlaps the same recorded micro-fragment with silence between clusters.
-- Field Drift uses short recorded fragments with reverse/rate changes and deliberate dropout windows.
-- Signal Scan uses tiny recorded windows and short static gates inside brief sweep bursts, followed by real silence.
-- Sensor input biases **timing and selection**, not semantic content.
-- The room microphone is a separate recording path.
-- Source events retain provenance in the session ledger.
+## Public-domain source collection
+
+The 12 human-reader sources come from the LibriVox **Sonnet 130** multi-reader collection hosted by Internet Archive. The Internet Archive item explicitly marks the collection as **Public Domain** and contains seventeen different readings by different volunteers.
+
+Item:
+https://archive.org/details/sonnet_130_librivox
+
+The separate radio texture remains a public-domain Wikimedia Commons recording:
+https://commons.wikimedia.org/wiki/File:Ekb_Metro_voice_messages_sample_05-2019.ogg
+
+## Runtime provenance
+
+The live gate path never presents these recordings as external audio. Every gate window is logged as app-sourced material. The microphone recording is a different path and can contain acoustic speaker bleed.
