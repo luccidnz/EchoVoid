@@ -462,8 +462,8 @@ public final class Ech0Engine {
             i1 = Math.max(min, Math.min(max, i1));
 
             double frac = Math.abs(src - Math.floor(src));
-            double a = (((spec.source.pcm[i0] & 0xff) - 128) / 128.0);
-            double b = (((spec.source.pcm[i1] & 0xff) - 128) / 128.0);
+            double a = spec.source.pcm[i0] / 32768.0;
+            double b = spec.source.pcm[i1] / 32768.0;
             double value = a + (b - a) * frac;
 
             return value * spec.gain * envelope(localOutputSample);
