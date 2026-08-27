@@ -5,9 +5,6 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,37 +15,33 @@ public final class WordlessGateEngine {
         void onEngineError(String message);
     }
 
-    private static final int OUTPUT_RATE = 22050;
     private static final int FRAME = 512;
-    private static final float BASE_RATE = 0.50f;
 
+    private final Context context;
     private final AudioBank bank;
     private final Listener listener;
     private final AtomicBoolean running = new AtomicBoolean(false);
-    private final Random random = new Random();
     private final Object bankLock = new Object();
+    private final Random random = new Random();
 
     private AudioTrack track;
     private Thread worker;
+    private AudioBank.LongBank activeBank;
 
     private volatile float gateTarget;
+    private volatile float gateCurrent;
     private volatile float output = 0.72f;
-    private volatile float reverb = 0.42f;
-    private volatile float sensorMix = 0.0f;
+    private volatile float reverb = 0.30f;
+    private volatile float sensorMix = 0f;
     private volatile float sensorActivity;
     private volatile long sensorSeed = 1L;
     private volatile String bankId = "voidmix";
-    private volatile String bankLabel = "VOID MIX • 12 voices";
+    private volatile String bankLabel = "VOID MIX • all source families";
 
-    private float gateCurrent;
-    private boolean gateWasOpen;
-    private long gateOpenedAtMs;
+    private long bankCursor;
     private long sessionStartedAtMs;
-
-    private List<Chunk> chunks = new ArrayList<>();
-    private int chunkIndex;
-    private long localOutputSample;
-    private long sequenceLoops;
+    private long gateOpenedAtMs;
+    private long gateOpenedAtCursor;
 
     private double[] delayA = new double[1];
     private double[] delayB = new double[1];
@@ -56,24 +49,26 @@ public final class WordlessGateEngine {
     private int delayBIndex;
 
     public WordlessGateEngine(Context context, Listener listener) throws Exception {
+        this.context = context.getApplicationContext();
         this.bank = new AudioBank(context);
         this.listener = listener;
-        rebuildBank("voidmix", 0x45434830564f4944L);
-        configureReverbBuffers();
+        loadBank("voidmix", false);
     }
 
     public String[] bankIds() {
-        return bank.bankIds();
+        return bank.realBankIds();
     }
 
     public String bankLabel(String id) {
-        return bank.bankLabel(id);
+        return bank.realBankLabel(id);
     }
 
     public void setBank(String id) {
-        if (id == null) return;
-        long seed = System.nanoTime() ^ sensorSeed ^ id.hashCode();
-        rebuildBank(id, seed);
+        try {
+            loadBank(id, true);
+        } catch (Exception e) {
+            if (listener != null) listener.onEngineError("Bank load failed: " + e.getMessage());
+        }
     }
 
     public String getBankId() {
@@ -84,6 +79,14 @@ public final class WordlessGateEngine {
         return bankLabel;
     }
 
+    public void reshufflePosition() {
+        synchronized (bankLock) {
+            if (activeBank == null || activeBank.pcm.length == 0) return;
+            random.setSeed(System.nanoTime() ^ sensorSeed ^ bankId.hashCode());
+            bankCursor = random.nextInt(activeBank.pcm.length);
+        }
+    }
+
     public void setGate(float amount) {
         float next = clamp01(amount);
         boolean opening = gateTarget < 0.05f && next >= 0.05f;
@@ -92,9 +95,10 @@ public final class WordlessGateEngine {
 
         if (opening) {
             gateOpenedAtMs = System.currentTimeMillis();
-            if (sensorMix > 0.001f) {
-                sensorBiasJump();
+            synchronized (bankLock) {
+                gateOpenedAtCursor = bankCursor;
             }
+            if (sensorMix > 0.001f) sensorBiasPosition();
         } else if (closing) {
             emitGateWindow();
         }
@@ -118,8 +122,8 @@ public final class WordlessGateEngine {
     }
 
     public void start() {
-        if (!bank.isReady()) {
-            if (listener != null) listener.onEngineError("Wordless source bank is unavailable.");
+        if (activeBank == null || activeBank.pcm.length == 0) {
+            if (listener != null) listener.onEngineError("Long wordless bank is unavailable.");
             return;
         }
         if (!running.compareAndSet(false, true)) return;
@@ -127,10 +131,10 @@ public final class WordlessGateEngine {
         sessionStartedAtMs = System.currentTimeMillis();
         gateTarget = 0f;
         gateCurrent = 0f;
-        gateWasOpen = false;
+        configureReverbBuffers(activeBank.sampleRate);
 
         int minBuffer = AudioTrack.getMinBufferSize(
-            OUTPUT_RATE,
+            activeBank.sampleRate,
             AudioFormat.CHANNEL_OUT_MONO,
             AudioFormat.ENCODING_PCM_16BIT
         );
@@ -143,7 +147,7 @@ public final class WordlessGateEngine {
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build())
                 .setAudioFormat(new AudioFormat.Builder()
-                    .setSampleRate(OUTPUT_RATE)
+                    .setSampleRate(activeBank.sampleRate)
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build())
@@ -157,7 +161,7 @@ public final class WordlessGateEngine {
             return;
         }
 
-        worker = new Thread(this::renderLoop, "Ech0VoidWordlessGate");
+        worker = new Thread(this::renderLoop, "Ech0VoidLongBankGate");
         worker.setPriority(Thread.MAX_PRIORITY);
         worker.start();
     }
@@ -188,17 +192,24 @@ public final class WordlessGateEngine {
         while (running.get()) {
             try {
                 for (int i = 0; i < FRAME; i++) {
-                    double raw = nextBankSample();
+                    double raw;
+                    synchronized (bankLock) {
+                        if (activeBank == null || activeBank.pcm.length == 0) {
+                            raw = 0.0;
+                        } else {
+                            raw = activeBank.pcm[(int) bankCursor] / 32768.0;
+                            bankCursor++;
+                            if (bankCursor >= activeBank.pcm.length) bankCursor = 0;
+                        }
+                    }
 
-                    // Smooth the manual gate to avoid clicks while keeping it responsive.
-                    float coefficient = gateTarget > gateCurrent ? 0.035f : 0.018f;
+                    float coefficient = gateTarget > gateCurrent ? 0.045f : 0.020f;
                     gateCurrent += (gateTarget - gateCurrent) * coefficient;
 
                     double gated = raw * gateCurrent;
                     double wet = processReverb(gated);
-                    double mix = (gated * (1.0 - reverb * 0.16)) + (wet * reverb * 0.82);
+                    double mix = gated * (1.0 - reverb * 0.12) + wet * reverb * 0.76;
                     mix *= output;
-
                     mix = Math.max(-1.0, Math.min(1.0, mix));
                     pcm[i] = (short) Math.round(mix * 32767.0);
                 }
@@ -209,95 +220,34 @@ public final class WordlessGateEngine {
                 }
             } catch (Throwable t) {
                 running.set(false);
-                if (listener != null) listener.onEngineError("Wordless gate stopped: " + t.getMessage());
+                if (listener != null) listener.onEngineError("Long-bank gate stopped: " + t.getMessage());
             }
         }
     }
 
-    private double nextBankSample() {
+    private void loadBank(String id, boolean randomStart) throws Exception {
+        AudioBank.LongBank next = bank.loadRealBank(context, id);
         synchronized (bankLock) {
-            if (chunks.isEmpty()) return 0.0;
-
-            Chunk chunk = chunks.get(chunkIndex);
-            if (localOutputSample >= chunk.outputLengthSamples) {
-                advanceChunk();
-                chunk = chunks.get(chunkIndex);
+            activeBank = next;
+            bankId = next.id;
+            bankLabel = next.label;
+            if (randomStart) {
+                random.setSeed(System.nanoTime() ^ sensorSeed ^ id.hashCode());
+                bankCursor = next.pcm.length == 0 ? 0 : random.nextInt(next.pcm.length);
+            } else {
+                bankCursor = 0;
             }
-
-            double sourcePerOutput =
-                (chunk.source.sampleRate / (double) OUTPUT_RATE) * BASE_RATE;
-            double sourceOffset = localOutputSample * sourcePerOutput;
-            double sourcePosition = (chunk.sourceStart + chunk.sourceLength - 1) - sourceOffset;
-
-            int min = chunk.sourceStart;
-            int max = chunk.sourceStart + chunk.sourceLength - 1;
-            int i0 = clamp((int) Math.floor(sourcePosition), min, max);
-            int i1 = clamp(i0 - 1, min, max);
-
-            double frac = Math.abs(sourcePosition - Math.floor(sourcePosition));
-            double a = chunk.source.pcm[i0] / 32768.0;
-            double b = chunk.source.pcm[i1] / 32768.0;
-            localOutputSample++;
-
-            return (a + (b - a) * frac) * 0.96;
+            configureReverbBuffers(next.sampleRate);
         }
     }
 
-    private void advanceChunk() {
-        localOutputSample = 0;
-        chunkIndex++;
-        if (chunkIndex >= chunks.size()) {
-            chunkIndex = 0;
-            sequenceLoops++;
-            Collections.shuffle(chunks, new Random(sensorSeed ^ System.nanoTime() ^ sequenceLoops));
-        }
-    }
-
-    private void rebuildBank(String id, long seed) {
-        List<AudioBank.Source> sources = bank.sourcesForBank(id);
-        List<Chunk> next = new ArrayList<>();
-
-        for (AudioBank.Source source : sources) {
-            // Josh's published HSB method is reverse -> about 50% speed -> chop into
-            // roughly two-second pieces -> randomize. At half-speed, one second of source
-            // becomes ~two seconds of output, so we chunk source audio in ~1 s sections.
-            int sourceChunk = Math.max(256, source.sampleRate);
-            for (int start = 0; start < source.pcm.length; start += sourceChunk) {
-                int length = Math.min(sourceChunk, source.pcm.length - start);
-                if (length < source.sampleRate / 5) continue;
-                next.add(new Chunk(source, start, length));
-            }
-        }
-
-        if (next.isEmpty()) return;
-        Collections.shuffle(next, new Random(seed));
-
+    private void sensorBiasPosition() {
         synchronized (bankLock) {
-            chunks = next;
-            chunkIndex = 0;
-            localOutputSample = 0;
-            sequenceLoops = 0;
-            bankId = id;
-            bankLabel = bank.bankLabel(id);
-        }
-    }
-
-    private void sensorBiasJump() {
-        synchronized (bankLock) {
-            if (chunks.isEmpty()) return;
-
-            long mixed = sensorSeed
-                ^ ((long) (sensorActivity * 1_000_003f))
-                ^ ((long) (sensorMix * 31_337f));
-
+            if (activeBank == null || activeBank.pcm.length == 0) return;
+            long mixed = sensorSeed ^ ((long) (sensorActivity * 1_000_003f));
             Random local = new Random(mixed);
-            int candidate = local.nextInt(chunks.size());
-
-            // Sensor Mix determines how strongly the sensor-selected position replaces
-            // the natural continuously-running bank position.
             if (local.nextFloat() < sensorMix) {
-                chunkIndex = candidate;
-                localOutputSample = 0;
+                bankCursor = local.nextInt(activeBank.pcm.length);
             }
         }
     }
@@ -312,26 +262,40 @@ public final class WordlessGateEngine {
 
         if (listener == null) return;
 
+        long cursor;
+        float bankSeconds;
+        synchronized (bankLock) {
+            cursor = gateOpenedAtCursor;
+            bankSeconds = activeBank == null ? 0f : activeBank.durationSeconds();
+        }
+
         SessionStore.SourceEvent event = new SessionStore.SourceEvent();
         event.offsetMs = Math.max(0, opened - sessionStartedAtMs);
-        event.sourceId = "wordless-bank:" + bankId + ":loop" + sequenceLoops + ":chunk" + chunkIndex;
+        event.sourceId = String.format(
+            Locale.US,
+            "long-bank:%s@%.2fs/%.0fs",
+            bankId,
+            activeBank == null || activeBank.sampleRate == 0 ? 0.0 : cursor / (double) activeBank.sampleRate,
+            bankSeconds
+        );
         event.family = "wordless-human-bank";
         event.label = bankLabel + " gate window";
         event.effect = String.format(
             Locale.US,
-            "manual-gate %.2fs / reversed / 50%% speed / reverb %.0f%%",
+            "manual-gate %.2fs / pre-rendered reversed+slowed+shuffled bank / reverb %.0f%%",
             duration / 1000.0,
             reverb * 100f
         );
-        event.rate = BASE_RATE;
+        event.rate = 1f;
         event.volume = output;
         event.sensorInfluence = clamp01(sensorActivity * sensorMix);
         listener.onGateEvent(event);
     }
 
-    private void configureReverbBuffers() {
-        delayA = new double[Math.max(1, Math.round(OUTPUT_RATE * 0.093f))];
-        delayB = new double[Math.max(1, Math.round(OUTPUT_RATE * 0.157f))];
+    private void configureReverbBuffers(int sampleRate) {
+        int rate = Math.max(8000, sampleRate);
+        delayA = new double[Math.max(1, Math.round(rate * 0.093f))];
+        delayB = new double[Math.max(1, Math.round(rate * 0.157f))];
         delayAIndex = 0;
         delayBIndex = 0;
     }
@@ -340,11 +304,11 @@ public final class WordlessGateEngine {
         double a = delayA[delayAIndex];
         double b = delayB[delayBIndex];
 
-        double feedbackA = 0.28 + reverb * 0.34;
-        double feedbackB = 0.22 + reverb * 0.30;
+        double feedbackA = 0.25 + reverb * 0.32;
+        double feedbackB = 0.20 + reverb * 0.28;
 
-        delayA[delayAIndex] = input + a * feedbackA + b * 0.08;
-        delayB[delayBIndex] = input * 0.72 + b * feedbackB + a * 0.06;
+        delayA[delayAIndex] = input + a * feedbackA + b * 0.07;
+        delayB[delayBIndex] = input * 0.70 + b * feedbackB + a * 0.05;
 
         delayAIndex++;
         if (delayAIndex >= delayA.length) delayAIndex = 0;
@@ -352,31 +316,6 @@ public final class WordlessGateEngine {
         if (delayBIndex >= delayB.length) delayBIndex = 0;
 
         return a * 0.58 + b * 0.42;
-    }
-
-    private static final class Chunk {
-        final AudioBank.Source source;
-        final int sourceStart;
-        final int sourceLength;
-        final long outputLengthSamples;
-
-        Chunk(AudioBank.Source source, int sourceStart, int sourceLength) {
-            this.source = source;
-            this.sourceStart = sourceStart;
-            this.sourceLength = sourceLength;
-            this.outputLengthSamples = Math.max(
-                1,
-                Math.round(
-                    sourceLength
-                        * (OUTPUT_RATE / (double) source.sampleRate)
-                        / BASE_RATE
-                )
-            );
-        }
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
     }
 
     private static float clamp01(float value) {
