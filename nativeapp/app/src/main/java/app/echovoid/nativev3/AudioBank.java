@@ -66,6 +66,39 @@ public final class AudioBank {
         return !sources.isEmpty();
     }
 
+    public String[] bankIds() {
+        return new String[]{"mixed", "male", "female", "foreign", "radio"};
+    }
+
+    public String bankLabel(String bankId) {
+        if ("male".equals(bankId)) return "Male Blend";
+        if ("female".equals(bankId)) return "Female Voice";
+        if ("foreign".equals(bankId)) return "Foreign Blend";
+        if ("radio".equals(bankId)) return "Radio / Announcement";
+        return "Mixed Human";
+    }
+
+    public List<Source> sourcesForBank(String bankId) {
+        List<Source> result = new ArrayList<>();
+        if (sources.isEmpty()) return result;
+
+        if ("male".equals(bankId)) {
+            result.add(sources.get(0));
+            result.add(sources.get(1));
+        } else if ("female".equals(bankId)) {
+            result.add(sources.get(2));
+        } else if ("foreign".equals(bankId)) {
+            result.add(sources.get(2));
+            result.add(sources.get(3));
+            result.add(sources.get(4));
+        } else if ("radio".equals(bankId)) {
+            result.add(sources.get(4));
+        } else {
+            result.addAll(sources);
+        }
+        return result;
+    }
+
     public FragmentSpec pick(
         long seed,
         int minMs,
