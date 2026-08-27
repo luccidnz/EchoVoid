@@ -154,30 +154,9 @@ public final class MainActivity extends Activity implements SensorFusion.Listene
             this::startGateSession
         ), marginTop(18));
 
-        TextView experimental = small("EXPERIMENTAL SECONDARY ENGINES", MUTED);
-        experimental.setPadding(0, dp(22), 0, 0);
-        page.addView(experimental);
-
-        page.addView(modeCard(
-            "ECHOBOX",
-            "Short recorded human micro-fragments with silence, overlap and decaying repeats.",
-            CYAN,
-            () -> startSession(Ech0Engine.Mode.ECHO_BOX)
-        ), marginTop(10));
-
-        page.addView(modeCard(
-            "FIELD DRIFT",
-            "Recorded micro-fragments broken into reverse jumps, rate drift, gaps and dropouts.",
-            VIOLET,
-            () -> startSession(Ech0Engine.Mode.FIELD_DRIFT)
-        ), marginTop(10));
-
-        page.addView(modeCard(
-            "SIGNAL SCAN",
-            "Ghost-box-style scan windows: short recorded voice slices, static gates and real pauses.",
-            AMBER,
-            () -> startSession(Ech0Engine.Mode.SIGNAL_SCAN)
-        ), marginTop(10));
+        TextView labNote = small("SECONDARY ENGINES TEMPORARILY DISABLED WHILE THE REAL GATE BANK IS PROVEN", MUTED);
+        labNote.setPadding(0, dp(20), 0, 0);
+        page.addView(labNote);
 
         LinearLayout row = horizontal();
         Button vault = secondaryButton("SESSION VAULT");
