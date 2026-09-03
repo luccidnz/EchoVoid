@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
+/** Loads finished wordless banks. Ech0Gate never chops speech at runtime. */
 public final class AudioBank {
     public static final class Source {
         public final String id;
@@ -21,6 +22,7 @@ public final class AudioBank {
         }
     }
 
+    /** Compatibility shape retained only so the disabled legacy engine still compiles. */
     public static final class FragmentSpec {
         public final Source source;
         public final int start;
@@ -38,13 +40,8 @@ public final class AudioBank {
             this.gain = gain;
         }
 
-        public int startMs() {
-            return Math.round(start * 1000f / source.sampleRate);
-        }
-
-        public int lengthMs() {
-            return Math.round(length * 1000f / source.sampleRate);
-        }
+        public int startMs() { return Math.round(start * 1000f / source.sampleRate); }
+        public int lengthMs() { return Math.round(length * 1000f / source.sampleRate); }
     }
 
     public static final class LongBank {
@@ -71,58 +68,51 @@ public final class AudioBank {
         this.context = context.getApplicationContext();
     }
 
-    public boolean isReady() {
-        return true;
-    }
+    public boolean isReady() { return true; }
 
     public String[] realBankIds() {
         return new String[]{
-            "voidmix",
-            "story",
-            "dark",
-            "multivoice",
-            "radio",
-            "crossfeed"
+            "middle_female_a",
+            "female_b",
+            "female_c",
+            "male_a",
+            "male_b",
+            "older_male_a",
+            "voice_a",
+            "mixed"
         };
     }
 
     public String realBankLabel(String id) {
-        if ("story".equals(id)) return "STORY FIELD • multi-reader";
-        if ("dark".equals(id)) return "DARK VOICE • long narrator";
-        if ("multivoice".equals(id)) return "MULTI-VOICE • many readers";
-        if ("radio".equals(id)) return "RADIO VOID • announcement";
-        if ("crossfeed".equals(id)) return "CROSSFEED • two source families";
-        return "VOID MIX • all source families";
+        if ("middle_female_a".equals(id)) return "Middle Female A";
+        if ("female_b".equals(id)) return "Female Voice B";
+        if ("female_c".equals(id)) return "Female Voice C";
+        if ("male_a".equals(id)) return "Male Voice A";
+        if ("male_b".equals(id)) return "Male Voice B";
+        if ("older_male_a".equals(id)) return "Older Male A";
+        if ("voice_a".equals(id)) return "Voice A";
+        return "Mixed Human";
     }
 
     public LongBank loadRealBank(Context ignored, String id) throws Exception {
         Resources r = context.getResources();
         int resId;
-        if ("story".equals(id)) resId = R.raw.bank_story;
-        else if ("dark".equals(id)) resId = R.raw.bank_dark;
-        else if ("multivoice".equals(id)) resId = R.raw.bank_multivoice;
-        else if ("radio".equals(id)) resId = R.raw.bank_radio;
-        else if ("crossfeed".equals(id)) resId = R.raw.bank_crossfeed;
-        else resId = R.raw.bank_voidmix;
+        if ("middle_female_a".equals(id)) resId = R.raw.bank_middle_female_a;
+        else if ("female_b".equals(id)) resId = R.raw.bank_female_b;
+        else if ("female_c".equals(id)) resId = R.raw.bank_female_c;
+        else if ("male_a".equals(id)) resId = R.raw.bank_male_a;
+        else if ("male_b".equals(id)) resId = R.raw.bank_male_b;
+        else if ("older_male_a".equals(id)) resId = R.raw.bank_older_male_a;
+        else if ("voice_a".equals(id)) resId = R.raw.bank_voice_a;
+        else resId = R.raw.bank_mixed;
 
         Source source = load(r, resId, id, realBankLabel(id));
         return new LongBank(id, realBankLabel(id), source.pcm, source.sampleRate);
     }
 
-    /*
-     * Compatibility only for the experimental legacy engines. Ech0Gate no longer
-     * builds a bank from this API. Returning null prevents any accidental fallback
-     * to the old runtime micro-fragment architecture.
-     */
-    public FragmentSpec pick(
-        long seed,
-        int minMs,
-        int maxMs,
-        float minRate,
-        float maxRate,
-        boolean allowReverse,
-        float gain
-    ) {
+    /** Disabled legacy engines may call this; returning null prevents old pseudo-bank behaviour. */
+    public FragmentSpec pick(long seed, int minMs, int maxMs, float minRate, float maxRate,
+                             boolean allowReverse, float gain) {
         return null;
     }
 
@@ -158,7 +148,6 @@ public final class AudioBank {
         if (bytes.length < 44 || !ascii(bytes, 0, 4).equals("RIFF") || !ascii(bytes, 8, 4).equals("WAVE")) {
             throw new IllegalArgumentException("Invalid WAV source");
         }
-
         WavData out = new WavData();
         int offset = 12;
         while (offset + 8 <= bytes.length) {
@@ -166,7 +155,6 @@ public final class AudioBank {
             int length = littleInt(bytes, offset + 4);
             int data = offset + 8;
             if (data + length > bytes.length) break;
-
             if ("fmt ".equals(chunk) && length >= 16) {
                 int format = littleShort(bytes, data);
                 if (format != 1) throw new IllegalArgumentException("Only PCM WAV supported");
@@ -178,10 +166,8 @@ public final class AudioBank {
                 out.dataLength = length;
                 break;
             }
-
             offset = data + length + (length & 1);
         }
-
         if (out.dataOffset <= 0 || out.dataLength <= 0 || out.sampleRate <= 0) {
             throw new IllegalArgumentException("WAV is missing required chunks");
         }
