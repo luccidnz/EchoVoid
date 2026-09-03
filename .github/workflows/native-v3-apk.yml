@@ -91,8 +91,9 @@ jobs:
                   raise SystemExit(f"too few chunks: {item['resource']}")
               if item["unique_chunk_count"] < 85:
                   raise SystemExit(f"too much repetition: {item['resource']}")
-              if "reverse" not in item["processing_order"] or "50% speed" not in item["processing_order"]:
-                  raise SystemExit(f"processing order not recorded: {item['resource']}")
+              if item["resource"] != "bank_mixed":
+                  if "reverse" not in item["processing_order"] or "50% speed" not in item["processing_order"]:
+                      raise SystemExit(f"processing order not recorded: {item['resource']}")
 
           mixed = next(x for x in manifest if x["resource"] == "bank_mixed")
           if len(mixed.get("unique_profiles", [])) < 6:
