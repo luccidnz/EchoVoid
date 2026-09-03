@@ -10,8 +10,8 @@ android {
         applicationId 'app.echovoid.nativev3'
         minSdk 24
         targetSdk 35
-        versionCode 300
-        versionName '3.0.0-native-alpha'
+        versionCode 400
+        versionName '4.0.0-hsb-core-alpha'
     }
 
     buildTypes {
