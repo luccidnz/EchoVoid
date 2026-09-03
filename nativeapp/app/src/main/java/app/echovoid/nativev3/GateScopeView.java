@@ -23,7 +23,7 @@ public final class GateScopeView extends View {
 
     public GateScopeView(Context context) {
         super(context);
-        setMinimumHeight(dp(210));
+        setMinimumHeight(Math.round(dp(210)));
         ringPaint.setStyle(Paint.Style.STROKE);
         innerPaint.setStyle(Paint.Style.FILL);
         wavePaint.setStyle(Paint.Style.STROKE);
