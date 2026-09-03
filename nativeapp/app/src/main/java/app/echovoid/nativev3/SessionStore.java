@@ -80,17 +80,19 @@ public final class SessionStore {
         public String mode;
         public long startedAt;
         public long durationMs;
+        // Retained for backwards compatibility with earlier native session files.
         public float avgActivity;
         public float peakActivity;
         public float avgMagneticUt;
         public String roomAudioPath;
+        public String internalAudioPath;
         public String notes = "";
         public final List<SourceEvent> events = new ArrayList<>();
         public final List<Marker> markers = new ArrayList<>();
 
         JSONObject toJson() throws Exception {
             JSONObject o = new JSONObject();
-            o.put("schema", "ech0void.native.session.v1");
+            o.put("schema", "ech0void.native.session.v2");
             o.put("id", id);
             o.put("mode", mode);
             o.put("startedAt", startedAt);
@@ -99,8 +101,12 @@ public final class SessionStore {
             o.put("peakActivity", peakActivity);
             o.put("avgMagneticUt", avgMagneticUt);
             o.put("roomAudioPath", roomAudioPath == null ? JSONObject.NULL : roomAudioPath);
+            o.put("internalAudioPath", internalAudioPath == null ? JSONObject.NULL : internalAudioPath);
             o.put("notes", notes == null ? "" : notes);
-            o.put("generatedSourceDisclosure", "All sourceEvents identify Ech0Void app-sourced audio. Wordless gate events use reversed/half-speed/shuffled recorded human banks; generated static is separately labelled. Room audio is a separate microphone capture and may contain speaker bleed.");
+            o.put(
+                "sourceDisclosure",
+                "Ech0Gate uses app-sourced pre-rendered wordless human speech banks. The bank advances continuously beneath a manually controlled noise gate. Core gate sessions do not use sensors to select audio or move the playhead. Room audio is a separate microphone capture and may contain acoustic speaker bleed. internalAudioPath is the app's direct gate output."
+            );
 
             JSONArray ev = new JSONArray();
             for (SourceEvent e : events) ev.put(e.toJson());
@@ -122,6 +128,7 @@ public final class SessionStore {
             s.peakActivity = (float) o.optDouble("peakActivity", 0);
             s.avgMagneticUt = (float) o.optDouble("avgMagneticUt", 0);
             if (!o.isNull("roomAudioPath")) s.roomAudioPath = o.optString("roomAudioPath", null);
+            if (!o.isNull("internalAudioPath")) s.internalAudioPath = o.optString("internalAudioPath", null);
             s.notes = o.optString("notes", "");
 
             JSONArray ev = o.optJSONArray("sourceEvents");
@@ -160,6 +167,10 @@ public final class SessionStore {
         return new File(sessionDir(id), "room.m4a");
     }
 
+    public File internalAudioFile(String id) {
+        return new File(sessionDir(id), "internal_gate.wav");
+    }
+
     public void save(Session session) throws Exception {
         File dir = sessionDir(session.id);
         File file = new File(dir, "session.json");
@@ -181,9 +192,8 @@ public final class SessionStore {
         if (dirs == null) return result;
         for (File dir : dirs) {
             if (!dir.isDirectory()) continue;
-            try {
-                result.add(load(dir.getName()));
-            } catch (Exception ignored) {}
+            try { result.add(load(dir.getName())); }
+            catch (Exception ignored) {}
         }
         Collections.sort(result, Comparator.comparingLong((Session s) -> s.startedAt).reversed());
         return result;
@@ -194,11 +204,8 @@ public final class SessionStore {
     }
 
     public String exportJson(Session session) {
-        try {
-            return session.toJson().toString(2);
-        } catch (Exception e) {
-            return "{}";
-        }
+        try { return session.toJson().toString(2); }
+        catch (Exception e) { return "{}"; }
     }
 
     private static byte[] readAll(File file) throws Exception {
