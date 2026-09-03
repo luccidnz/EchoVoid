@@ -1,18 +1,18 @@
-name: Build Ech0Void Real Banks APK
+name: Build Ech0Void HSB Core V4 APK
 
 on:
   push:
     branches:
-      - rebuild/ech0void-native-v3-real-banks
+      - rebuild/ech0void-hsb-core-v4
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  native-v3-apk:
+  hsb-core-v4:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -36,16 +36,18 @@ jobs:
             sudo apt-get install -y ffmpeg
           fi
 
-      - name: Render real long wordless banks
+      - name: Validate bank builder syntax
+        run: python3 -m py_compile nativeapp/tools/build_wordless_banks.py
+
+      - name: Render HSB-style single-speaker banks
         run: |
           set -euo pipefail
           python3 nativeapp/tools/build_wordless_banks.py
-          echo "Rendered bank files:"
+          echo "Rendered banks:"
           ls -lh nativeapp/app/src/main/res/raw/bank_*.wav
-          echo "Bank manifest:"
           cat nativeapp/app/src/main/res/raw/bank_manifest.json
 
-      - name: Validate banks are real and distinct
+      - name: Prove banks are long unique finished streams
         run: |
           python3 - <<'PY'
           import hashlib, json, wave
@@ -53,28 +55,48 @@ jobs:
 
           raw = Path("nativeapp/app/src/main/res/raw")
           wavs = sorted(raw.glob("bank_*.wav"))
-          if len(wavs) != 6:
-              raise SystemExit(f"expected 6 banks, got {len(wavs)}")
+          expected = {
+              "bank_middle_female_a.wav",
+              "bank_female_b.wav",
+              "bank_female_c.wav",
+              "bank_male_a.wav",
+              "bank_male_b.wav",
+              "bank_older_male_a.wav",
+              "bank_voice_a.wav",
+              "bank_mixed.wav",
+          }
+          names = {p.name for p in wavs}
+          if names != expected:
+              raise SystemExit(f"bank set mismatch: {sorted(names)}")
 
           hashes = {}
           for path in wavs:
-              data = path.read_bytes()
-              h = hashlib.sha256(data).hexdigest()
+              h = hashlib.sha256(path.read_bytes()).hexdigest()
               with wave.open(str(path), "rb") as w:
-                  dur = w.getnframes() / w.getframerate()
-                  print(path.name, f"{dur:.1f}s", h[:16])
-                  if dur < 110:
-                      raise SystemExit(f"{path.name} is too short: {dur}")
+                  duration = w.getnframes() / w.getframerate()
+                  print(path.name, f"{duration:.1f}s", h[:16])
+                  if w.getnchannels() != 1 or w.getsampwidth() != 2 or w.getframerate() != 16000:
+                      raise SystemExit(f"bad PCM format: {path.name}")
+                  if duration < 175:
+                      raise SystemExit(f"bank too short: {path.name} {duration:.1f}s")
               if h in hashes:
-                  raise SystemExit(f"duplicate bank audio: {path.name} == {hashes[h]}")
+                  raise SystemExit(f"duplicate WAV: {path.name} == {hashes[h]}")
               hashes[h] = path.name
 
           manifest = json.loads((raw / "bank_manifest.json").read_text())
+          if len(manifest) != 8:
+              raise SystemExit(f"expected 8 manifest entries, got {len(manifest)}")
           for item in manifest:
-              if item["chunks"] < 55:
-                  raise SystemExit(f"too few chunks in {item['name']}")
-              if item["unique_source_count"] < 1:
-                  raise SystemExit(f"no source diversity in {item['name']}")
+              if item["chunks"] < 85:
+                  raise SystemExit(f"too few chunks: {item['resource']}")
+              if item["unique_chunk_count"] < 85:
+                  raise SystemExit(f"too much repetition: {item['resource']}")
+              if "reverse" not in item["processing_order"] or "50% speed" not in item["processing_order"]:
+                  raise SystemExit(f"processing order not recorded: {item['resource']}")
+
+          mixed = next(x for x in manifest if x["resource"] == "bank_mixed")
+          if len(mixed.get("unique_profiles", [])) < 6:
+              raise SystemExit("mixed bank lacks source-profile diversity")
           PY
 
       - name: Build native Android APK
@@ -83,16 +105,16 @@ jobs:
 
       - name: Prepare phone APK
         run: |
-          cp nativeapp/app/build/outputs/apk/debug/app-debug.apk Ech0Void-Real-Banks-test.apk
-          ls -lh Ech0Void-Real-Banks-test.apk
-          sha256sum Ech0Void-Real-Banks-test.apk | tee Ech0Void-Real-Banks-test.sha256
+          cp nativeapp/app/build/outputs/apk/debug/app-debug.apk Ech0Void-HSB-Core-V4-test.apk
+          ls -lh Ech0Void-HSB-Core-V4-test.apk
+          sha256sum Ech0Void-HSB-Core-V4-test.apk | tee Ech0Void-HSB-Core-V4-test.sha256
 
       - name: Upload phone APK
         uses: actions/upload-artifact@v4
         with:
-          name: Ech0Void-Real-Banks-test
+          name: Ech0Void-HSB-Core-V4-test
           path: |
-            Ech0Void-Real-Banks-test.apk
-            Ech0Void-Real-Banks-test.sha256
+            Ech0Void-HSB-Core-V4-test.apk
+            Ech0Void-HSB-Core-V4-test.sha256
           if-no-files-found: error
           retention-days: 14
