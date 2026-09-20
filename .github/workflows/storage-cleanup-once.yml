@@ -1,0 +1,28 @@
+name: One-shot artifact storage cleanup
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/storage-cleanup-once.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete superseded EchoVoid phone APK artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(9612772243 9612845676)
+          for id in "${ids[@]}"; do
+            echo "Deleting artifact $id"
+            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/actions/artifacts/$id"
+          done
+          echo "Deleted ${#ids[@]} superseded artifacts."
