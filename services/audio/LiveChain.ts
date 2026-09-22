@@ -9,31 +9,44 @@ let fx: string = 'Echo';
 let onLevel: ((n: number) => void) | null = null;
 
 
-	export async function startLiveChain(opts: { onLevel?: (n: number) => void; gain?: number; fx?: string }) {
-		if (isActive) return;
-		isActive = true;
-		gain = opts.gain ?? 1.0;
-		fx = opts.fx ?? 'Echo';
-		onLevel = opts.onLevel ?? null;
-		console.time('LiveChain:start');
-		try {
-			await Audio.requestPermissionsAsync();
-			await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-			recording = new Audio.Recording();
-			await recording.prepareToRecordAsync(RecordingOptionsPresets.HIGH_QUALITY);
-			await recording.startAsync();
-			// Simulate level monitoring (real: use Audio API or native module)
-			const levelInterval = setInterval(() => {
-				if (!isActive || !onLevel) return;
-				const mockLevel = Math.random() * gain;
-				onLevel(mockLevel);
-			}, 100);
-			(recording as any)._levelInterval = levelInterval;
-		} catch (e) {
-			// handle error
-		}
-		console.timeEnd('LiveChain:start');
-	}
+        export async function startLiveChain(opts: { onLevel?: (n: number) => void; gain?: number; fx?: string }) {
+                if (isActive) return false;
+                isActive = true;
+                gain = opts.gain ?? 1.0;
+                fx = opts.fx ?? 'Echo';
+                onLevel = opts.onLevel ?? null;
+                console.time('LiveChain:start');
+                let levelInterval: NodeJS.Timeout | null = null;
+                try {
+                        await Audio.requestPermissionsAsync();
+                        await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+                        recording = new Audio.Recording();
+                        await recording.prepareToRecordAsync(RecordingOptionsPresets.HIGH_QUALITY);
+                        await recording.startAsync();
+                        // Simulate level monitoring (real: use Audio API or native module)
+                        levelInterval = setInterval(() => {
+                                if (!isActive || !onLevel) return;
+                                const mockLevel = Math.random() * gain;
+                                onLevel(mockLevel);
+                        }, 100);
+                        (recording as any)._levelInterval = levelInterval;
+                        return true;
+                } catch (e) {
+                        console.error(e);
+                        isActive = false;
+                        if (levelInterval) clearInterval(levelInterval);
+                        if (recording) {
+                                try {
+                                        await recording.stopAndUnloadAsync();
+                                } catch {}
+                                recording = null;
+                        }
+                        return false;
+                } finally {
+                        if (!isActive && levelInterval) clearInterval(levelInterval);
+                        console.timeEnd('LiveChain:start');
+                }
+        }
 
 	export async function stopLiveChain() {
 		console.time('LiveChain:stop');
