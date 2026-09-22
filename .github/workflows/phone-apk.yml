@@ -1,0 +1,90 @@
+name: Build phone APK
+
+on:
+  push:
+    branches:
+      - rebuild/ech0void-core-v2
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install JavaScript dependencies
+        run: npm install
+
+      - name: Verify Expo dependency alignment
+        run: npx expo install --check
+
+      - name: Generate native Android project
+        env:
+          CI: '1'
+          NODE_ENV: production
+        run: npx expo prebuild --platform android --clean
+
+      - name: Configure ARM64 release build
+        working-directory: android
+        run: |
+          cat >> gradle.properties <<'EOF'
+          reactNativeArchitectures=arm64-v8a
+          android.enableMinifyInReleaseBuilds=false
+          android.enableShrinkResourcesInReleaseBuilds=false
+          org.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=1024m
+          EOF
+
+      - name: Build installable ARM64 release APK
+        working-directory: android
+        env:
+          NODE_ENV: production
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon --stacktrace
+
+      - name: Prepare phone APK
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk Ech0Void-v2-phone-arm64.apk
+          ls -lh Ech0Void-v2-phone-arm64.apk
+          sha256sum Ech0Void-v2-phone-arm64.apk | tee Ech0Void-v2-phone-arm64.sha256
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ech0Void-v2-phone-arm64-apk
+          path: |
+            Ech0Void-v2-phone-arm64.apk
+            Ech0Void-v2-phone-arm64.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish/update direct phone download release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="Standalone ARM64 Android test APK for modern phones such as the Galaxy S25. Built from rebuild/ech0void-core-v2. No Expo Go, computer, Metro server, or USB connection is required. This is a test build signed with the development key, not the final Play Store release."
+          if gh release view phone-build --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit phone-build --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Ech0Void V2 Phone Build" --notes "$NOTES"
+          else
+            gh release create phone-build --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Ech0Void V2 Phone Build" --notes "$NOTES"
+          fi
+          gh release delete-asset phone-build Ech0Void-v2-phone.apk --repo "$GITHUB_REPOSITORY" -y 2>/dev/null || true
+          gh release upload phone-build Ech0Void-v2-phone-arm64.apk Ech0Void-v2-phone-arm64.sha256 --repo "$GITHUB_REPOSITORY" --clobber

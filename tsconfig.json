@@ -1,12 +1,19 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-  "baseUrl": ".",
-  "paths": { "src/*": ["src/*"] },
-  "jsx": "react-native",
-  "strict": true,
-  "skipLibCheck": true,
-  "moduleResolution": "bundler",
-  "customConditions": ["react-native"],
+    "strict": true,
+    "skipLibCheck": true
   },
-  "extends": "expo/tsconfig.base"
+  "include": [
+    "App.tsx",
+    "src/ech0void/**/*.ts",
+    "src/navigation/AppNavigator.tsx",
+    "src/screens/WelcomeScreen.tsx",
+    "src/screens/HomeScreen.tsx",
+    "src/screens/TransmissionScreen.tsx",
+    "src/screens/LogbookScreen.tsx",
+    "src/screens/SessionDetailScreen.tsx",
+    "src/screens/SettingsScreen.tsx",
+    "tests/ech0void-core.test.ts"
+  ]
 }

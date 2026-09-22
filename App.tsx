@@ -1,101 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeProvider } from './src/theme/theme';
-import EsmeraProvider from './services/tts/EsmeraProvider';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import OnboardingIntro from './screens/Onboarding/Intro';
-import OnboardingHowTo from './screens/Onboarding/HowTo';
-import OnboardingPrivacy from './screens/Onboarding/Privacy';
-import { Magnetometer, Accelerometer } from 'expo-sensors';
-import { Alert } from 'react-native';
-import TestNavigator from './src/navigation/TestNavigator';
 
-const Stack = createNativeStackNavigator();
+class StartupBoundary extends Component<React.PropsWithChildren, { error: Error | null }> {
+  state = { error: null as Error | null };
 
-// Ensure proper handling of sensor data and fallback logic
-function runSensorTestAndCalibration() {
-  return new Promise<{ mag: { x: number; y: number; z: number } | null; acc: { x: number; y: number; z: number } | null }>((resolve, reject) => {
-    let magReady = false, accReady = false;
-    let magData: { x: number; y: number; z: number } | null = null;
-    let accData: { x: number; y: number; z: number } | null = null;
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
 
-    const finish = () => {
-      magSub.remove();
-      accSub.remove();
-      if (magData && accData) {
-        console.log('Sensor data collected successfully:', { mag: magData, acc: accData });
-        resolve({ mag: magData, acc: accData });
-      } else {
-        console.error('Sensor data incomplete:', { mag: magData, acc: accData });
-        reject(new Error('Sensor data incomplete'));
-      }
-    };
+  render() {
+    if (this.state.error) {
+      return (
+        <SafeAreaView style={styles.failure}>
+          <Text style={styles.failureKicker}>ECH0VOID STARTUP DIAGNOSTIC</Text>
+          <Text style={styles.failureTitle}>JavaScript boot error</Text>
+          <Text selectable style={styles.failureBody}>{this.state.error.message || String(this.state.error)}</Text>
+          <Pressable style={styles.retry} onPress={() => this.setState({ error: null })}>
+            <Text style={styles.retryText}>RETRY BOOT</Text>
+          </Pressable>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
 
-    const magSub = Magnetometer.addListener((data) => {
-      magData = data;
-      magReady = true;
-      if (magReady && accReady) finish();
-    });
+function BootGate() {
+  const [ready, setReady] = useState(false);
 
-    const accSub = Accelerometer.addListener((data) => {
-      accData = data;
-      accReady = true;
-      if (magReady && accReady) finish();
-    });
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 180);
+    return () => clearTimeout(timer);
+  }, []);
 
-    setTimeout(() => {
-      if (!magReady || !accReady) finish();
-    }, 2000);
-  });
+  if (!ready) {
+    return (
+      <SafeAreaView style={styles.boot}>
+        <Text style={styles.bootKicker}>ECH0VOID // SAFE BOOT</Text>
+        <Text style={styles.bootTitle}>Opening the void…</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Delay navigator evaluation until after the primitive React Native shell is visibly alive.
+  // If a JS module fails during navigator startup, StartupBoundary shows the actual message.
+  const AppNavigator = require('./src/navigation/AppNavigator').default as React.ComponentType;
+  return <AppNavigator />;
 }
 
 export default function App() {
-  // Set default value for showOnboarding
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    runSensorTestAndCalibration().then((result) => {
-      // Optionally store result in context or AsyncStorage
-      console.log('Sensor calibration:', result);
-    });
-    const checkOnboarded = async () => {
-      const v = await AsyncStorage.getItem('onboarded');
-      setShowOnboarding(v !== '1');
-    };
-    checkOnboarded();
-    const interval = setInterval(checkOnboarded, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Add debugging logs to showOnboarding state transitions
-  useEffect(() => {
-    console.log('showOnboarding state changed:', showOnboarding);
-  }, [showOnboarding]);
-
-  // Add debugging logs to verify showOnboarding state
-  console.log('showOnboarding state:', showOnboarding);
-
-  if (showOnboarding === null) return null;
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <EsmeraProvider>
-          <NavigationContainer>
-            {showOnboarding ? (
-              <Stack.Navigator initialRouteName="OnboardingIntro" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="OnboardingIntro" component={OnboardingIntro} />
-                <Stack.Screen name="OnboardingHowTo" component={OnboardingHowTo} />
-                <Stack.Screen name="OnboardingPrivacy" component={OnboardingPrivacy} />
-              </Stack.Navigator>
-            ) : (
-              <TestNavigator />
-            )}
-          </NavigationContainer>
-        </EsmeraProvider>
-      </ThemeProvider>
+      <StartupBoundary>
+        <BootGate />
+      </StartupBoundary>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  boot: { flex: 1, backgroundColor: '#030408', alignItems: 'center', justifyContent: 'center', padding: 28 },
+  bootKicker: { color: '#47E9FF', fontSize: 11, fontWeight: '900', letterSpacing: 2.4 },
+  bootTitle: { color: '#F4F7FB', fontSize: 28, fontWeight: '900', marginTop: 10 },
+  failure: { flex: 1, backgroundColor: '#030408', justifyContent: 'center', padding: 24 },
+  failureKicker: { color: '#FFB84D', fontSize: 10, fontWeight: '900', letterSpacing: 2 },
+  failureTitle: { color: '#F4F7FB', fontSize: 30, fontWeight: '900', marginTop: 9, marginBottom: 15 },
+  failureBody: { color: '#AEB8C7', fontSize: 13, lineHeight: 20, backgroundColor: '#0A0E15', borderRadius: 14, padding: 15 },
+  retry: { marginTop: 18, backgroundColor: '#47E9FF', paddingVertical: 14, borderRadius: 14, alignItems: 'center' },
+  retryText: { color: '#021014', fontWeight: '900', letterSpacing: 1.2 },
+});

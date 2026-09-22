@@ -1,52 +1,60 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { navTheme } from '../theme/theme';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import HomeScreen from '../screens/HomeScreen';
-import TransmissionScreen from '../screens/TransmissionScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import ARModeScreen from '../screens/ARModeScreen';
-
-import Logbook from '../../screens/Logbook';
-import SessionDetail from '../../components/logbook/SessionDetail';
-import OnboardingIntro from '../../screens/Onboarding/Intro';
-import OnboardingHowTo from '../../screens/Onboarding/HowTo';
-import OnboardingPrivacy from '../../screens/Onboarding/Privacy';
+import type { Ech0Mode } from '../ech0void/types';
 import WelcomeScreen from '../screens/WelcomeScreen';
+import HomeScreen from '../screens/HomeScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import { voidTheme } from '../ech0void/theme';
 
 export type RootStackParamList = {
   Welcome: undefined;
   Home: undefined;
-  Transmission: undefined;
-  Settings: undefined;
-  ARMode: undefined;
+  Transmission: { mode: Ech0Mode };
   Logbook: undefined;
-  SessionDetail: { session: any };
+  SessionDetail: { sessionId: string };
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: voidTheme.bg,
+    card: voidTheme.panel,
+    text: voidTheme.text,
+    border: voidTheme.border,
+    primary: voidTheme.cyan,
+  },
+};
 
-function AppNavigator() {
-  // Log navigation container state
-  console.log('[AppNavigator] Navigation state:', Stack.Navigator);
+function TransmissionRoute(props: any) {
+  const Screen = require('../screens/TransmissionScreen').default;
+  return <Screen {...props} />;
+}
 
+function LogbookRoute(props: any) {
+  const Screen = require('../screens/LogbookScreen').default;
+  return <Screen {...props} />;
+}
+
+function SessionDetailRoute(props: any) {
+  const Screen = require('../screens/SessionDetailScreen').default;
+  return <Screen {...props} />;
+}
+
+export default function AppNavigator() {
   return (
-    <NavigationContainer
-      theme={navTheme}
-      onStateChange={(state) => console.log('[AppNavigator] Navigation state changed:', state)}
-    >
-      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+    <NavigationContainer theme={navigationTheme}>
+      <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Transmission" component={TransmissionScreen} />
+        <Stack.Screen name="Transmission" component={TransmissionRoute} />
+        <Stack.Screen name="Logbook" component={LogbookRoute} />
+        <Stack.Screen name="SessionDetail" component={SessionDetailRoute} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="ARMode" component={ARModeScreen} />
-        <Stack.Screen name="Logbook" component={Logbook} />
-        <Stack.Screen name="SessionDetail" component={SessionDetail} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-export default AppNavigator;
